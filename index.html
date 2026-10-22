@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="de">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#0f172a" />
+    <title>Lucky Act</title>
+    <link rel="manifest" href="manifest.json" />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="top-bar">
+        <div class="app-brand">Lucky Act</div>
+      </header>
+
+      <main class="screen-container">
+        <section id="start-screen" class="screen active" aria-labelledby="start-title">
+          <div class="card">
+            <p class="eyebrow">Partyspiel</p>
+            <h1 id="start-title">Lucky Act</h1>
+            <p class="subtitle">Eine Aktivität. Eine Intensität. Kannst du sie erraten?</p>
+
+            <div class="action-stack">
+              <button id="new-task-btn" class="primary-btn" type="button">Neue Aufgabe</button>
+              <button id="manage-activities-btn" class="secondary-btn" type="button">Aktivitäten verwalten</button>
+            </div>
+
+            <p id="start-activity-count" class="activity-count" aria-live="polite"></p>
+          </div>
+        </section>
+
+        <section id="task-screen" class="screen" aria-live="polite">
+          <div class="card task-card">
+            <p class="eyebrow">Deine Aufgabe</p>
+            <div id="task-number" class="task-number" aria-live="polite">8/10</div>
+            <h2 id="task-activity" class="task-activity">Ein Tier nachmachen</h2>
+            <p id="task-intensity" class="task-intensity">Hohe Intensität – sehr ausdrucksstark darstellen!</p>
+
+            <div class="action-stack">
+              <button id="next-task-btn" class="primary-btn" type="button">Nächste Aufgabe</button>
+              <button id="back-to-start-btn" class="secondary-btn" type="button">Zurück zum Start</button>
+            </div>
+          </div>
+        </section>
+
+        <section id="manage-screen" class="screen" aria-labelledby="manage-title">
+          <div class="card">
+            <h2 id="manage-title">Aktivitäten verwalten</h2>
+
+            <form id="activity-form" class="activity-form" novalidate>
+              <label class="sr-only" for="activity-input">Neue Aktivität</label>
+              <input
+                id="activity-input"
+                type="text"
+                maxlength="120"
+                placeholder="Neue Aktivität eingeben"
+                autocomplete="off"
+              />
+              <button id="add-activity-btn" class="primary-btn small-btn" type="submit">Aktivität hinzufügen</button>
+            </form>
+
+            <p id="activity-feedback" class="feedback" aria-live="polite"></p>
+
+            <div class="activities-header">
+              <h3>Gespeicherte Aktivitäten</h3>
+              <span id="activity-counter" class="chip" aria-live="polite">0</span>
+            </div>
+
+            <ul id="activity-list" class="activity-list" aria-live="polite"></ul>
+
+            <div class="action-stack">
+              <button id="manage-back-btn" class="secondary-btn" type="button">Zurück zum Start</button>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <p id="global-status" class="global-status" aria-live="polite"></p>
+    </div>
+
+    <script src="script.js" defer></script>
+  </body>
+</html>
