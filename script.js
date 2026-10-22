@@ -92,11 +92,6 @@ const DEFAULT_ACTIVITIES = [
   'Spiele vor, dass du einen Regenschirm bei einem plötzlichen Windstoß festhalten musst.',
   'Stelle dar, wie du bei einem überraschenden Feuerwerk den Himmel bewunderst.',
   'Spiele eine Person, die einen verlorenen Gegenstand unter dem Sofa entdeckt und erleichtert aufatmet.',
-  'Freiwillig: Erzähle von einem Date, bei dem etwas Unerwartetes oder Peinliches passiert ist.',
-  'Freiwillig: Gestehe eine harmlose Angewohnheit, die du sonst lieber für dich behältst.',
-  'Wenn alle Beteiligten einverstanden sind: Mach einer Person deiner Wahl ein ehrliches, konkretes Kompliment.',
-  'Freiwillig: Halte einen zehnsekündigen Werbevortrag für etwas völlig Alltägliches, das du gerade siehst.',
-  'Freiwillig: Teile eine kleine Sache, die du dich schon lange einmal trauen wolltest, aber noch nicht getan hast.'
 ];
 
 const LEGACY_ACTIVITY_REPLACEMENTS = new Map([
