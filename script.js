@@ -1,6 +1,6 @@
 const STORAGE_KEY = 'luckyActActivities';
 const STORAGE_VERSION_KEY = 'luckyActActivitiesVersion';
-const STORAGE_VERSION = 2;
+const STORAGE_VERSION = 3;
 const DEFAULT_ACTIVITIES = [
   'Imitiere ein Auto, das beim ersten Startversuch nicht anspringt.',
   'Stelle dar, wie ein Auto an einer roten Ampel quietschend abbremst.',
@@ -91,7 +91,12 @@ const DEFAULT_ACTIVITIES = [
   'Stelle eine Person dar, die beim ersten Versuch ein Schloss mit dem richtigen Schlüssel öffnet.',
   'Spiele vor, dass du einen Regenschirm bei einem plötzlichen Windstoß festhalten musst.',
   'Stelle dar, wie du bei einem überraschenden Feuerwerk den Himmel bewunderst.',
-  'Spiele eine Person, die einen verlorenen Gegenstand unter dem Sofa entdeckt und erleichtert aufatmet.'
+  'Spiele eine Person, die einen verlorenen Gegenstand unter dem Sofa entdeckt und erleichtert aufatmet.',
+  'Freiwillig: Erzähle von einem Date, bei dem etwas Unerwartetes oder Peinliches passiert ist.',
+  'Freiwillig: Gestehe eine harmlose Angewohnheit, die du sonst lieber für dich behältst.',
+  'Wenn alle Beteiligten einverstanden sind: Mach einer Person deiner Wahl ein ehrliches, konkretes Kompliment.',
+  'Freiwillig: Halte einen zehnsekündigen Werbevortrag für etwas völlig Alltägliches, das du gerade siehst.',
+  'Freiwillig: Teile eine kleine Sache, die du dich schon lange einmal trauen wolltest, aber noch nicht getan hast.'
 ];
 
 const LEGACY_ACTIVITY_REPLACEMENTS = new Map([
