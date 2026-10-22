@@ -1,21 +1,116 @@
 const STORAGE_KEY = 'luckyActActivities';
+const STORAGE_VERSION_KEY = 'luckyActActivitiesVersion';
+const STORAGE_VERSION = 2;
 const DEFAULT_ACTIVITIES = [
-  'Ein Tier nachmachen',
-  'Einen Roboter darstellen',
-  'Einen Motor imitieren',
-  'Eine berühmte Person darstellen',
-  'Einen Sportler darstellen',
-  'Eine Person darstellen, die sich erschreckt',
-  'Einen Gegenstand pantomimisch erklären',
-  'So tun, als würde man einen schweren Gegenstand tragen',
-  'Einen Filmcharakter darstellen',
-  'Eine Person darstellen, die sich sehr freut',
-  'Wie ein bestimmtes Fahrzeug klingen',
-  'Einen unsichtbaren Gegenstand benutzen',
-  'Eine Person darstellen, die etwas nicht versteht',
-  'Eine Alltagssituation pantomimisch vorspielen',
-  'Eine übertriebene Siegesfeier darstellen'
+  'Imitiere ein Auto, das beim ersten Startversuch nicht anspringt.',
+  'Stelle dar, wie ein Auto an einer roten Ampel quietschend abbremst.',
+  'Imitiere ein Motorrad, das an einer Kreuzung losfährt und davonbraust.',
+  'Mache das Geräusch eines Zuges nach, der langsam im Bahnhof einfährt.',
+  'Stelle pantomimisch dar, wie ein Busfahrer die Türen schließt und losfährt.',
+  'Imitiere ein Fahrrad, dessen Klingel zweimal kurz läutet.',
+  'Mache ein Flugzeug nach, das über dir hinwegfliegt und leiser wird.',
+  'Imitiere eine Katze, die laut miaut, weil ihr Futternapf leer ist.',
+  'Stelle einen Hund dar, der sich nach einem Regenschauer trocken schüttelt.',
+  'Mache den Ruf eines Kuckucks dreimal hintereinander nach.',
+  'Imitiere einen Frosch, der an einem Teich quakt.',
+  'Stelle eine Ente dar, die watschelnd zum Wasser geht und quakt.',
+  'Imitiere eine Eule, die nachts von einem Ast aus ruft.',
+  'Mache das Geräusch eines tropfenden Wasserhahns nach, der immer schneller tropft.',
+  'Imitiere einen Wecker, der morgens klingelt und dann ausgeschaltet wird.',
+  'Stelle dar, wie du einen hartnäckigen Schluckauf loswerden willst.',
+  'Spiele vor, dass du niesen musst, es aber immer wieder unterdrückst.',
+  'Stelle dar, wie du auf eine frisch aufgeschnittene, sehr saure Zitrone beißt.',
+  'Spiele vor, dass du dich über ein unerwartetes Geburtstagsgeschenk freust.',
+  'Stelle dar, wie du den Bus knapp verpasst und ihm enttäuscht nachsiehst.',
+  'Spiele vor, dass du im Fahrstuhl den falschen Knopf drückst und auf der falschen Etage aussteigst.',
+  'Spiele vor, dass du einen wichtigen Namen vergessen hast und ihn zu erraten versuchst.',
+  'Stelle dar, wie du eine Fliege verscheuchst, die immer wieder um dich herumfliegt.',
+  'Spiele vor, dass du ein Geheimnis erzählen willst, aber bemerkst, dass jemand zuhört.',
+  'Stelle dar, wie du versuchst, während einer ernsten Ansprache nicht zu lachen.',
+  'Spiele vor, dass du dich auf Zehenspitzen an einer knarrenden Tür vorbeischleichst.',
+  'Stelle dar, wie du einen viel zu schweren Koffer über eine kurze Strecke ziehst.',
+  'Spiele vor, dass du mit nassen Händen eine Türklinke öffnen möchtest.',
+  'Stelle dar, wie du in einer überfüllten Tasche hektisch nach deinem Schlüssel suchst.',
+  'Spiele vor, dass du ein unsichtbares Geschenk vorsichtig auspackst und überrascht bist.',
+  'Stelle dar, wie du auf glattem Boden vorsichtig das Gleichgewicht hältst.',
+  'Spiele eine Barista-Person, die einen Cappuccino zubereitet und den Milchschaum verziert.',
+  'Stelle eine Wettermoderatorin dar, die einen überraschenden Sturm ankündigt.',
+  'Spiele einen Nachrichtensprecher, der eine Eilmeldung besonders ernst vorliest.',
+  'Stelle eine Zugbegleiterin dar, die eine Verspätung freundlich durchsagt.',
+  'Spiele einen Museumsführer, der ein unsichtbares Gemälde besonders feierlich erklärt.',
+  'Stelle eine Köchin dar, die eine Suppe probiert und noch eine Prise Salz hinzufügt.',
+  'Spiele einen Fotografen, der eine Gruppe für ein gemeinsames Foto arrangiert.',
+  'Stelle eine Bibliothekarin dar, die jemanden freundlich um Ruhe bittet.',
+  'Spiele einen Detektiv, der eine einzelne Fußspur entdeckt und untersucht.',
+  'Stelle eine Zauberin dar, die ein imaginäres Tuch verschwinden lässt.',
+  'Spiele einen Piraten, der auf einer Schatzkarte den eingezeichneten X-Punkt findet.',
+  'Stelle eine Astronautin dar, die in Zeitlupe durch die Schwerelosigkeit schwebt.',
+  'Spiele einen Roboter mit fast leerem Akku, der immer langsamer wird.',
+  'Stelle einen Dirigenten dar, der ein Orchester erst leise und dann laut spielen lässt.',
+  'Spiele einen Sportreporter, der ein Tor in der letzten Spielsekunde kommentiert.',
+  'Stelle einen Tennisspieler dar, der aufschlägt und den Punkt gewinnt.',
+  'Spiele eine Basketballspielerin, die einen Freiwurf trifft und sich über den Punkt freut.',
+  'Stelle einen Fußballtorwart dar, der einen Elfmeter hält.',
+  'Spiele eine Bowling-Spielerin, die alle Pins mit einem Wurf umwirft.',
+  'Stelle einen Golfer dar, der einen kurzen Putt konzentriert ins Loch spielt.',
+  'Spiele einen Skifahrer, der vorsichtig durch zwei Slalomstangen fährt.',
+  'Stelle eine Tischtennisspielerin dar, die einen schnellen Ballwechsel gewinnt.',
+  'Spiele einen Boxer, der sich vor einem imaginären Kampf aufwärmt.',
+  'Stelle eine Läuferin dar, die nach einem Rennen die Ziellinie überquert.',
+  'Spiele einen Angler, der einen schweren Fisch an Land zieht.',
+  'Stelle eine Person dar, die beim Yoga in den Baumstand kommt und das Gleichgewicht hält.',
+  'Spiele einen Musiker, der vor dem Auftritt nervös seine Gitarre stimmt.',
+  'Stelle eine Opernsängerin dar, die einen besonders hohen Ton hält.',
+  'Spiele einen Schlagzeuger, der ein kurzes, mitreißendes Solo spielt.',
+  'Stelle einen DJ dar, der einen Songwechsel ankündigt und den Einsatz gibt.',
+  'Spiele eine Person, die bei Karaoke den Refrain ihres Lieblingslieds begeistert singt.',
+  'Stelle einen Straßenmusiker dar, der nach einem gelungenen Stück sein Publikum grüßt.',
+  'Spiele eine Balletttänzerin, die vor einem imaginären Auftritt ihre Position einnimmt.',
+  'Stelle einen Breakdancer dar, der eine einfache Drehung beendet und eine Pose hält.',
+  'Spiele einen Schauspieler, der bei einer Preisverleihung eine Dankesrede hält.',
+  'Stelle eine Person dar, die bei einem Konzert den Lieblingssong erkennt und mitsingt.',
+  'Spiele einen Stand-up-Comedian, der nach einer Pointe auf die Reaktion des Publikums wartet.',
+  'Stelle dar, wie du ein zu heißes Stück Pizza vorsichtig abkühlst, bevor du hineinbeißt.',
+  'Spiele vor, dass du eine große Spaghetti-Nudel auf die Gabel drehst und probierst.',
+  'Stelle dar, wie du eine Eiswaffel isst, bevor sie in der Sonne schmilzt.',
+  'Spiele vor, dass du einen prickelnden Sprudel trinkst und überrascht aufstoßen musst.',
+  'Stelle dar, wie du beim Kochen einen Topfdeckel anhebst und vom Dampf überrascht wirst.',
+  'Spiele vor, dass du eine sehr scharfe Chili probierst und sofort nach Wasser suchst.',
+  'Stelle dar, wie du einen viel zu großen Bissen nimmst und langsam kauen musst.',
+  'Spiele vor, dass du beim Öffnen einer Getränkedose vom Zischen überrascht wirst.',
+  'Stelle eine Person dar, die ein kompliziertes Rezept liest und die nächste Zutat abmisst.',
+  'Spiele vor, dass du einen Kuchen aus dem Ofen holst und stolz das Ergebnis präsentierst.',
+  'Stelle dar, wie du im Dunkeln nach dem Lichtschalter tastest und ihn endlich findest.',
+  'Spiele vor, dass du eine Nachricht auf dem Handy liest und mit einem breiten Grinsen reagierst.',
+  'Stelle dar, wie du eine viel zu lange Sprachnachricht anhörst und ungeduldig wirst.',
+  'Spiele vor, dass du bei einem Videoanruf bemerkst, dass dein Mikrofon ausgeschaltet ist.',
+  'Stelle dar, wie du einen Papierflieger faltest und seinen Flug gespannt verfolgst.',
+  'Spiele vor, dass du einen Luftballon aufbläst und ihn vorsichtig verknotest.',
+  'Stelle dar, wie du eine Geburtstagskerze auspustest und auf den Wunsch wartest.',
+  'Spiele vor, dass du beim Gesellschaftsspiel kurz vor dem Ziel stehst und die letzte Zahl würfelst.',
+  'Stelle eine Person dar, die beim ersten Versuch ein Schloss mit dem richtigen Schlüssel öffnet.',
+  'Spiele vor, dass du einen Regenschirm bei einem plötzlichen Windstoß festhalten musst.',
+  'Stelle dar, wie du bei einem überraschenden Feuerwerk den Himmel bewunderst.',
+  'Spiele eine Person, die einen verlorenen Gegenstand unter dem Sofa entdeckt und erleichtert aufatmet.'
 ];
+
+const LEGACY_ACTIVITY_REPLACEMENTS = new Map([
+  ['Ein Tier nachmachen', 'Imitiere eine Katze, die laut miaut, weil ihr Futternapf leer ist.'],
+  ['Einen Roboter darstellen', 'Spiele einen Roboter mit fast leerem Akku, der immer langsamer wird.'],
+  ['Einen Motor imitieren', 'Imitiere ein Auto, das beim ersten Startversuch nicht anspringt.'],
+  ['Eine berühmte Person darstellen', 'Spiele einen Nachrichtensprecher, der eine Eilmeldung besonders ernst vorliest.'],
+  ['Einen Sportler darstellen', 'Stelle einen Tennisspieler dar, der aufschlägt und den Punkt gewinnt.'],
+  ['Eine Person darstellen, die sich erschreckt', 'Spiele vor, dass du beim Öffnen einer Getränkedose vom Zischen überrascht wirst.'],
+  ['Einen Gegenstand pantomimisch erklären', 'Stelle dar, wie du einen Papierflieger faltest und seinen Flug gespannt verfolgst.'],
+  ['So tun, als würde man einen schweren Gegenstand tragen', 'Stelle dar, wie du einen viel zu schweren Koffer über eine kurze Strecke ziehst.'],
+  ['Einen Filmcharakter darstellen', 'Spiele einen Detektiv, der eine einzelne Fußspur entdeckt und untersucht.'],
+  ['Eine Person darstellen, die sich sehr freut', 'Spiele vor, dass du dich über ein unerwartetes Geburtstagsgeschenk freust.'],
+  ['Wie ein bestimmtes Fahrzeug klingen', 'Mache das Geräusch eines Zuges nach, der langsam im Bahnhof einfährt.'],
+  ['Einen unsichtbaren Gegenstand benutzen', 'Stelle dar, wie du in einer überfüllten Tasche hektisch nach deinem Schlüssel suchst.'],
+  ['Eine Person darstellen, die etwas nicht versteht', 'Stelle eine Person dar, die ein kompliziertes Rezept liest und die nächste Zutat abmisst.'],
+  ['Eine Alltagssituation pantomimisch vorspielen', 'Stelle dar, wie du den Bus knapp verpasst und ihm enttäuscht nachsiehst.'],
+  ['Eine übertriebene Siegesfeier darstellen', 'Spiele eine Bowling-Spielerin, die alle Pins mit einem Wurf umwirft.']
+]);
 
 const state = {
   activities: [],
@@ -107,13 +202,23 @@ function loadActivities() {
       return state.activities;
     }
 
-    state.activities = parsed
+    const storedActivities = parsed
       .map((item) => String(item).trim())
       .filter((item) => item.length > 0);
 
-    if (state.activities.length === 0) {
+    if (storedActivities.length === 0) {
       state.activities = getDefaultActivities();
       saveActivities({ silent: true });
+      return state.activities;
+    }
+
+    const storedVersion = Number.parseInt(localStorage.getItem(STORAGE_VERSION_KEY) || '0', 10);
+
+    if (!Number.isFinite(storedVersion) || storedVersion < STORAGE_VERSION) {
+      state.activities = migrateActivities(storedActivities);
+      saveActivities({ silent: true });
+    } else {
+      state.activities = storedActivities;
     }
 
     return state.activities;
@@ -123,6 +228,24 @@ function loadActivities() {
     setStatus('Die gespeicherten Aktivitäten konnten nicht gelesen werden. Die Standardliste wurde wiederhergestellt.', 'warning');
     return state.activities;
   }
+}
+
+function migrateActivities(activities) {
+  const migratedActivities = activities.map(
+    (activity) => LEGACY_ACTIVITY_REPLACEMENTS.get(activity) || activity
+  );
+  const existingActivities = new Set(migratedActivities.map((activity) => activity.toLowerCase()));
+
+  DEFAULT_ACTIVITIES.forEach((activity) => {
+    const normalizedActivity = activity.toLowerCase();
+
+    if (!existingActivities.has(normalizedActivity)) {
+      migratedActivities.push(activity);
+      existingActivities.add(normalizedActivity);
+    }
+  });
+
+  return migratedActivities;
 }
 
 function saveActivities(options = {}) {
@@ -137,6 +260,7 @@ function saveActivities(options = {}) {
 
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state.activities));
+    localStorage.setItem(STORAGE_VERSION_KEY, String(STORAGE_VERSION));
     return true;
   } catch (error) {
     if (!silent) {

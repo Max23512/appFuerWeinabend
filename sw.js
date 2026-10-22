@@ -1,4 +1,4 @@
-const CACHE_NAME = 'lucky-act-v1';
+const CACHE_NAME = 'lucky-act-v2';
 const APP_SHELL = [
   './',
   './index.html',
