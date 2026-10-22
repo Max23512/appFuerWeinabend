@@ -96,9 +96,9 @@ function loadActivities() {
   try {
     const stored = window.localStorage.getItem(STORAGE_KEY);
     if (stored === null) {
-      activities = [...DEFAULT_ACTIVITIES];
+      activities = normalizeActivities(DEFAULT_ACTIVITIES);
       if (!saveActivities()) {
-        showFeedback("Speichern ist nicht verfügbar. Änderungen bleiben möglicherweise nur bis zum Schließen dieser Sitzung erhalten.", "warning");
+        showFeedback("Speichern ist nicht verfügbar.", "warning");
       }
       return;
     }
@@ -110,19 +110,19 @@ function loadActivities() {
 
     activities = normalizeActivities(parsed);
     if (activities.length !== parsed.length) {
-      showFeedback("Einige ungültige oder doppelte gespeicherte Einträge wurden übersprungen.", "warning");
+      showFeedback("Ungültige oder doppelte Einträge wurden übersprungen.", "warning");
     }
     if (!saveActivities()) {
-      showFeedback("Die Aktivitäten wurden geladen, konnten aber nicht im neuen Format gespeichert werden.", "warning");
+      showFeedback("Aktivitäten geladen, aber nicht gespeichert.", "warning");
     }
   } catch (error) {
     console.error("Die gespeicherten Aktivitäten konnten nicht geladen werden.", error);
-    activities = [...DEFAULT_ACTIVITIES];
+    activities = normalizeActivities(DEFAULT_ACTIVITIES);
 
     const saved = saveActivities();
     const detail = saved
-      ? "Die gespeicherte Liste war nicht lesbar; die Standardaktivitäten wurden geladen."
-      : "Der lokale Speicher ist nicht verfügbar. Die Standardaktivitäten gelten möglicherweise nur bis zum Schließen dieser Sitzung.";
+      ? "Liste nicht lesbar. Standardaktivitäten geladen."
+      : "Lokaler Speicher nicht verfügbar.";
     showFeedback(detail, "warning");
   }
 }
@@ -161,7 +161,7 @@ function loadGameState() {
     }
   } catch (error) {
     console.error("Der gespeicherte Wiederholungs-Spielstand konnte nicht geladen werden.", error);
-    showFeedback("Der Spielstand für Wiederholungen war nicht lesbar und wurde neu gestartet.", "warning");
+    showFeedback("Wiederholungs-Spielstand nicht lesbar.", "warning");
   }
 }
 
@@ -182,9 +182,9 @@ function renderRepeatControls() {
   const eligible = eligibleActivities();
   const usedCount = eligible.filter((activity) => usedActivityIds.has(activity.id)).length;
   for (const progress of document.querySelectorAll("[data-repeat-progress]")) {
-    progress.textContent = eligible.length > 0
+    progress.textContent = avoidRepeats && eligible.length > 0
       ? `Bereits gezogen: ${usedCount} von ${eligible.length}`
-      : "Noch keine passenden Aufgaben vorhanden";
+      : "";
   }
 }
 
@@ -240,18 +240,18 @@ function showScreen(name) {
 
 function getIntensityDescription(number) {
   if (number <= 2) {
-    return "Sehr geringe Intensität – stelle es ganz zurückhaltend dar.";
+    return "Sehr gering – zurückhaltend darstellen.";
   }
   if (number <= 4) {
-    return "Geringe Intensität – eine leichte, unauffällige Darstellung.";
+    return "Gering – leicht darstellen.";
   }
   if (number <= 6) {
-    return "Mittlere Intensität – stelle es deutlich erkennbar dar.";
+    return "Mittel – deutlich darstellen.";
   }
   if (number <= 8) {
-    return "Hohe Intensität – sehr ausdrucksstark darstellen!";
+    return "Hoch – ausdrucksstark darstellen.";
   }
-  return "Sehr hohe Intensität – besonders ausdrucksstark, aber immer sicher!";
+  return "Sehr hoch – ausdrucksstark und sicher darstellen.";
 }
 
 function createTask() {
@@ -267,8 +267,8 @@ function createTask() {
     showScreen("home");
     showFeedback(
       activities.length === 0
-        ? "Es sind keine Aktivitäten gespeichert. Füge welche über „Aktivitäten verwalten“ hinzu."
-        : "Für diesen Modus gibt es keine passenden Aktivitäten. Aktiviere Mehrpersonen-Aufgaben oder füge eine Einpersonenaktivität hinzu.",
+        ? "Keine Aktivitäten vorhanden. Füge Aktivitäten hinzu."
+        : "Keine passenden Aktivitäten. Ändere den Modus oder füge weitere Aktivitäten hinzu.",
       "error"
     );
     document.querySelector("#manage-from-home").focus();
@@ -313,7 +313,7 @@ function createTask() {
   usedActivityIds.add(activity.id);
   renderRepeatControls();
   if (!saveGameState()) {
-    showFeedback("Die Aufgabe wurde angezeigt, aber der Wiederholungs-Spielstand konnte nicht gespeichert werden.", "warning");
+    showFeedback("Wiederholungs-Spielstand nicht gespeichert.", "warning");
   }
   document.querySelector("#next-task-button").focus({ preventScroll: true });
 }
@@ -323,20 +323,20 @@ function addActivity(event) {
 
   const name = activityInput.value.trim().slice(0, MAX_ACTIVITY_LENGTH);
   if (!name) {
-    showFeedback("Gib zuerst eine Aktivität ein.", "error");
+    showFeedback("Aktivität eingeben.", "error");
     activityInput.focus();
     return;
   }
 
   if (activities.some((savedActivity) => activityKey(savedActivity.name) === activityKey(name))) {
-    showFeedback("Diese Aktivität ist bereits in deiner Sammlung.", "error");
+    showFeedback("Diese Aktivität ist bereits gespeichert.", "error");
     activityInput.focus();
     return;
   }
 
   const personCount = Number(personCountInput.value);
   if (![1, 2, 3].includes(personCount)) {
-    showFeedback("Wähle eine gültige Personenzahl aus.", "error");
+    showFeedback("Personenzahl auswählen.", "error");
     personCountInput.focus();
     return;
   }
@@ -348,8 +348,8 @@ function addActivity(event) {
   personCountInput.value = "1";
   showFeedback(
     saved
-      ? `„${name}“ wurde hinzugefügt.`
-      : `„${name}“ wurde hinzugefügt, aber nicht dauerhaft gespeichert. Änderungen bleiben möglicherweise nur bis zum Schließen dieser Sitzung erhalten.`,
+      ? `„${name}“ hinzugefügt.`
+      : `„${name}“ hinzugefügt, aber nicht gespeichert.`,
     saved ? "success" : "warning"
   );
   activityInput.focus();
@@ -361,8 +361,8 @@ function deleteActivity(index) {
   const saved = saveActivities();
   showFeedback(
     saved
-      ? `„${removed.name}“ wurde gelöscht.`
-      : `„${removed.name}“ wurde gelöscht, aber die Änderung konnte nicht dauerhaft gespeichert werden.`,
+      ? `„${removed.name}“ gelöscht.`
+      : `„${removed.name}“ gelöscht, aber nicht gespeichert.`,
     saved ? "success" : "warning"
   );
 }
@@ -382,7 +382,7 @@ function updateAvoidRepeats() {
   avoidRepeats = !avoidRepeats;
   renderRepeatControls();
   if (!saveGameState()) {
-    showFeedback("Die Einstellung konnte nicht dauerhaft gespeichert werden.", "warning");
+    showFeedback("Einstellung nicht gespeichert.", "warning");
   }
 }
 
@@ -393,6 +393,13 @@ document.querySelector("#manage-home-button").addEventListener("click", () => sh
 document.querySelector("#task-home-button").addEventListener("click", () => showScreen("home"));
 document.querySelector("#task-home-secondary").addEventListener("click", () => showScreen("home"));
 document.querySelector("#activity-form").addEventListener("submit", addActivity);
+const rulesDialog = document.querySelector("#rules-dialog");
+document.querySelector("#rules-button").addEventListener("click", () => rulesDialog.showModal());
+rulesDialog.addEventListener("click", (event) => {
+  if (event.target === rulesDialog) {
+    rulesDialog.close();
+  }
+});
 for (const toggle of document.querySelectorAll("[data-multi-person-toggle]")) {
   toggle.addEventListener("click", updateMultiPersonMode);
 }
@@ -414,6 +421,6 @@ const isSecureAppOrigin = window.location.protocol === "https:"
 if ("serviceWorker" in navigator && isSecureAppOrigin) {
   navigator.serviceWorker.register("./sw.js").catch((error) => {
     console.error("Die Offline-Unterstützung konnte nicht aktiviert werden.", error);
-    showFeedback("Die Offline-Unterstützung konnte nicht aktiviert werden. Die App ist online weiterhin nutzbar.", "warning");
+    showFeedback("Offline-Modus nicht verfügbar.", "warning");
   });
 }

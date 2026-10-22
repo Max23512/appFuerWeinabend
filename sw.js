@@ -1,4 +1,4 @@
-const CACHE_NAME = "lucky-act-v3";
+const CACHE_NAME = "lucky-act-v5";
 const APP_FILES = ["./", "./index.html", "./style.css", "./script.js", "./manifest.json"];
 
 self.addEventListener("install", (event) => {

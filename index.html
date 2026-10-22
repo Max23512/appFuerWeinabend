@@ -3,8 +3,8 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-    <meta name="theme-color" content="#101018">
-    <meta name="description" content="Eine Aktivität. Eine Intensität. Kannst du sie erraten?">
+    <meta name="theme-color" content="#111116">
+    <meta name="description" content="Aktivitäten mit zufälliger Intensität für euer Spiel.">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>Lucky Act – Das Partyspiel</title>
@@ -19,21 +19,11 @@
           <span class="brand-mark" aria-hidden="true">L</span>
           <span>Lucky <span class="brand-accent">Act</span></span>
         </a>
-        <span class="header-tag"><span class="live-dot" aria-hidden="true"></span> PARTY-MODUS</span>
       </header>
 
       <main>
-        <section class="screen home-screen" id="home-screen" aria-labelledby="home-title">
-          <div class="hero-copy">
-            <p class="eyebrow"><span aria-hidden="true">✦</span> DAS SPIEL FÜR EURE RUNDE</p>
-            <h1 id="home-title">Zeig, was<br>in dir <span>steckt.</span></h1>
-            <p class="intro">Eine Aktivität. Eine Intensität.<br>Kannst du sie erraten?</p>
-          </div>
-
+        <section class="screen home-screen" id="home-screen" aria-label="Spiel">
           <div class="home-card">
-            <div class="card-orbit" aria-hidden="true"><span>✳</span></div>
-            <p class="card-kicker">BEREIT FÜR DEN NÄCHSTEN AUFTRITT?</p>
-            <p class="card-copy">Hol dir deine geheime Aufgabe und leg los.</p>
             <button class="button button-primary button-large" id="new-task-button" type="button">
               <span>Neue Aufgabe</span><span class="button-arrow" aria-hidden="true">↗</span>
             </button>
@@ -52,19 +42,15 @@
               <span class="toggle-track" aria-hidden="true"><span class="toggle-thumb"></span></span>
             </button>
             <p class="repeat-progress" data-repeat-progress aria-live="polite"></p>
-            <button class="button button-secondary" id="manage-from-home" type="button">
-              <span class="button-icon" aria-hidden="true">☷</span> Aktivitäten verwalten
-            </button>
+            <button class="button button-secondary" id="manage-from-home" type="button">Aktivitäten</button>
             <p class="activity-count"><span class="count-dot" aria-hidden="true"></span><span id="home-activity-count">0 Aktivitäten</span></p>
           </div>
-          <p class="home-note"><span aria-hidden="true">◈</span> Nur ihr, eure Fantasie und ein bisschen Mut.</p>
         </section>
 
         <section class="screen task-screen" id="task-screen" aria-labelledby="task-title" hidden>
-          <button class="back-link" id="task-home-button" type="button"><span aria-hidden="true">←</span> Zurück zum Start</button>
+          <button class="back-link" id="task-home-button" type="button">← Start</button>
           <div class="task-card">
-            <p class="eyebrow"><span aria-hidden="true">✦</span> DEIN MOMENT</p>
-            <h1 id="task-title">Deine Aufgabe</h1>
+            <h1 id="task-title">Aufgabe</h1>
             <div class="intensity-display" aria-label="Intensität">
               <span id="task-number" class="intensity-number">1</span>
               <span class="intensity-total">/10</span>
@@ -73,7 +59,7 @@
             <h2 id="task-activity" class="task-activity"></h2>
             <p id="task-people" class="task-people" hidden></p>
             <p id="task-description" class="task-description"></p>
-            <p class="safe-play-note"><span aria-hidden="true">✧</span> Ausdruck zählt – bleibt immer sicher.</p>
+            <p class="safe-play-note">Spielt sicher.</p>
             <button class="people-mode task-people-mode" type="button" data-multi-person-toggle aria-pressed="false" aria-label="Mehrpersonen-Aufgaben">
               <span class="people-mode-copy">
                 <span class="people-mode-title">Mehrpersonen-Aufgaben</span>
@@ -92,22 +78,20 @@
             <button class="button button-primary button-large" id="next-task-button" type="button">
               <span>Nächste Aufgabe</span><span class="button-arrow" aria-hidden="true">↗</span>
             </button>
-            <button class="button button-quiet" id="task-home-secondary" type="button">Zurück zum Start</button>
+            <button class="button button-quiet" id="task-home-secondary" type="button">Start</button>
           </div>
         </section>
 
         <section class="screen manage-screen" id="manage-screen" aria-labelledby="manage-title" hidden>
-          <button class="back-link" id="manage-home-button" type="button"><span aria-hidden="true">←</span> Zurück zum Start</button>
+          <button class="back-link" id="manage-home-button" type="button">← Start</button>
           <div class="manage-heading">
-            <p class="eyebrow"><span aria-hidden="true">✦</span> DEIN SPIEL, DEINE REGELN</p>
-            <h1 id="manage-title">Aktivitäten<br><span>verwalten.</span></h1>
-            <p class="intro">Gestalte die Aufgaben ganz nach eurer Runde.</p>
+            <h1 id="manage-title">Aktivitäten</h1>
           </div>
 
           <form class="add-form" id="activity-form">
             <label for="activity-input">Neue Aktivität</label>
             <div class="input-row">
-              <input id="activity-input" name="activity" type="text" maxlength="120" autocomplete="off" placeholder="z. B. Einen Popstar nachmachen">
+              <input id="activity-input" name="activity" type="text" maxlength="120" autocomplete="off" placeholder="Aktivität eingeben">
             </div>
             <div class="input-options">
               <label for="person-count-input">Benötigte Personen</label>
@@ -116,16 +100,16 @@
                 <option value="2">2 Personen</option>
                 <option value="3">3 Personen</option>
               </select>
-              <button class="button button-primary add-button" type="submit"><span aria-hidden="true">＋</span><span>Aktivität hinzufügen</span></button>
+              <button class="button button-primary add-button" type="submit">Hinzufügen</button>
             </div>
-            <p class="input-hint">Bis zu 120 Zeichen. Doppelte Einträge sind nicht möglich.</p>
+            <p class="input-hint">Max. 120 Zeichen. Keine doppelten Einträge.</p>
           </form>
 
           <div class="list-heading">
-            <h2>Deine Sammlung</h2>
+            <h2>Gespeicherte Aktivitäten</h2>
             <span class="count-badge" id="manage-activity-count">0</span>
           </div>
-          <p class="empty-state" id="empty-state" hidden>Noch keine Aktivitäten. Füge deine erste hinzu, um spielen zu können.</p>
+          <p class="empty-state" id="empty-state" hidden>Keine Aktivitäten vorhanden.</p>
           <ul class="activity-list" id="activity-list" aria-label="Gespeicherte Aktivitäten"></ul>
         </section>
 
@@ -133,8 +117,13 @@
       </main>
 
       <footer class="site-footer">
-        <span>LUCKY ACT</span><span class="footer-separator" aria-hidden="true">·</span><span>GEMEINSAM SPIELEN</span>
+        <button class="footer-button" id="rules-button" type="button">Regeln</button>
+        <button class="footer-button" type="button">Impressum</button>
       </footer>
     </div>
+
+    <dialog class="rules-dialog" id="rules-dialog" aria-label="Regeln">
+      <p>Wenn es sich nach Schummeln anfühlt, ist es verboten.</p>
+    </dialog>
   </body>
 </html>
