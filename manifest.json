@@ -1,7 +1,6 @@
 {
   "name": "Lucky Act – Party Game",
   "short_name": "Lucky Act",
-<<<<<<< HEAD
   "description": "Ein einfaches Partyspiel zum Generieren geheimer Aufgaben und Intensitäten.",
   "start_url": "./",
   "scope": "./",
@@ -9,14 +8,3 @@
   "background_color": "#0f172a",
   "theme_color": "#1d4ed8"
 }
-=======
-  "description": "Aktivitäten mit zufälliger Intensität.",
-  "lang": "de",
-  "start_url": "./",
-  "scope": "./",
-  "display": "standalone",
-  "orientation": "portrait",
-  "background_color": "#111116",
-  "theme_color": "#111116"
-}
->>>>>>> a5685d79ab41d18bdb649289fccdaf681752e11c
