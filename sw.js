@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 const CACHE_NAME = 'lucky-act-v2';
 const APP_SHELL = [
   './',
@@ -6,6 +7,10 @@ const APP_SHELL = [
   './script.js',
   './manifest.json'
 ];
+=======
+const CACHE_NAME = "lucky-act-v5";
+const APP_FILES = ["./", "./index.html", "./style.css", "./script.js", "./manifest.json"];
+>>>>>>> a5685d79ab41d18bdb649289fccdaf681752e11c
 
 self.addEventListener('install', (event) => {
   event.waitUntil(

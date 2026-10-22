@@ -189,9 +189,17 @@ function loadActivities() {
     const stored = localStorage.getItem(STORAGE_KEY);
 
     if (stored === null) {
+<<<<<<< HEAD
       state.activities = getDefaultActivities();
       saveActivities({ silent: true });
       return state.activities;
+=======
+      activities = normalizeActivities(DEFAULT_ACTIVITIES);
+      if (!saveActivities()) {
+        showFeedback("Speichern ist nicht verfügbar.", "warning");
+      }
+      return;
+>>>>>>> a5685d79ab41d18bdb649289fccdaf681752e11c
     }
 
     const parsed = JSON.parse(stored);
@@ -202,6 +210,7 @@ function loadActivities() {
       return state.activities;
     }
 
+<<<<<<< HEAD
     const storedActivities = parsed
       .map((item) => String(item).trim())
       .filter((item) => item.length > 0);
@@ -219,14 +228,33 @@ function loadActivities() {
       saveActivities({ silent: true });
     } else {
       state.activities = storedActivities;
+=======
+    activities = normalizeActivities(parsed);
+    if (activities.length !== parsed.length) {
+      showFeedback("Ungültige oder doppelte Einträge wurden übersprungen.", "warning");
+    }
+    if (!saveActivities()) {
+      showFeedback("Aktivitäten geladen, aber nicht gespeichert.", "warning");
+>>>>>>> a5685d79ab41d18bdb649289fccdaf681752e11c
     }
 
     return state.activities;
   } catch (error) {
+<<<<<<< HEAD
     state.activities = getDefaultActivities();
     saveActivities({ silent: true });
     setStatus('Die gespeicherten Aktivitäten konnten nicht gelesen werden. Die Standardliste wurde wiederhergestellt.', 'warning');
     return state.activities;
+=======
+    console.error("Die gespeicherten Aktivitäten konnten nicht geladen werden.", error);
+    activities = normalizeActivities(DEFAULT_ACTIVITIES);
+
+    const saved = saveActivities();
+    const detail = saved
+      ? "Liste nicht lesbar. Standardaktivitäten geladen."
+      : "Lokaler Speicher nicht verfügbar.";
+    showFeedback(detail, "warning");
+>>>>>>> a5685d79ab41d18bdb649289fccdaf681752e11c
   }
 }
 
@@ -274,8 +302,50 @@ function updateActivityCount() {
   const count = state.activities.length;
   const label = count === 1 ? 'gespeicherte Aktivität' : 'gespeicherte Aktivitäten';
 
+<<<<<<< HEAD
   elements.startActivityCount.textContent = `${count} ${label}`;
   elements.activityCounter.textContent = String(count);
+=======
+    const parsed = JSON.parse(stored);
+    if (typeof parsed.avoidRepeats === "boolean") {
+      avoidRepeats = parsed.avoidRepeats;
+    }
+    if (Array.isArray(parsed.usedActivityIds)) {
+      const validIds = new Set(activities.map((activity) => activity.id));
+      for (const id of parsed.usedActivityIds) {
+        if (typeof id === "string" && validIds.has(id)) {
+          usedActivityIds.add(id);
+        }
+      }
+    }
+  } catch (error) {
+    console.error("Der gespeicherte Wiederholungs-Spielstand konnte nicht geladen werden.", error);
+    showFeedback("Wiederholungs-Spielstand nicht lesbar.", "warning");
+  }
+}
+
+function eligibleActivities() {
+  return multiPersonMode
+    ? activities
+    : activities.filter((activity) => activity.personCount === 1);
+}
+
+function renderRepeatControls() {
+  for (const toggle of document.querySelectorAll("[data-avoid-repeats-toggle]")) {
+    toggle.setAttribute("aria-pressed", String(avoidRepeats));
+    toggle.querySelector(".people-mode-status").textContent = avoidRepeats
+      ? "An – keine Wiederholungen"
+      : "Aus – Wiederholungen erlaubt";
+  }
+
+  const eligible = eligibleActivities();
+  const usedCount = eligible.filter((activity) => usedActivityIds.has(activity.id)).length;
+  for (const progress of document.querySelectorAll("[data-repeat-progress]")) {
+    progress.textContent = avoidRepeats && eligible.length > 0
+      ? `Bereits gezogen: ${usedCount} von ${eligible.length}`
+      : "";
+  }
+>>>>>>> a5685d79ab41d18bdb649289fccdaf681752e11c
 }
 
 function renderActivities() {
@@ -334,6 +404,7 @@ function getRandomActivity() {
 }
 
 function getIntensityDescription(number) {
+<<<<<<< HEAD
   if (number >= 1 && number <= 2) {
     return 'Sehr geringe Intensität – eine sehr zurückhaltende Darstellung.';
   }
@@ -351,6 +422,21 @@ function getIntensityDescription(number) {
   }
 
   return 'Sehr hohe Intensität – eine besonders ausdrucksstarke Darstellung innerhalb sicherer Grenzen.';
+=======
+  if (number <= 2) {
+    return "Sehr gering – zurückhaltend darstellen.";
+  }
+  if (number <= 4) {
+    return "Gering – leicht darstellen.";
+  }
+  if (number <= 6) {
+    return "Mittel – deutlich darstellen.";
+  }
+  if (number <= 8) {
+    return "Hoch – ausdrucksstark darstellen.";
+  }
+  return "Sehr hoch – ausdrucksstark und sicher darstellen.";
+>>>>>>> a5685d79ab41d18bdb649289fccdaf681752e11c
 }
 
 function showTask(task) {
@@ -359,11 +445,23 @@ function showTask(task) {
   elements.taskIntensity.textContent = getIntensityDescription(task.number);
 }
 
+<<<<<<< HEAD
 // Eine neue Aufgabe entsteht nur durch einen bewussten Klick auf den Button.
 function startNewTask() {
   if (state.activities.length === 0) {
     setStatus('Es ist noch keine Aktivität gespeichert. Bitte füge zuerst eine Aktivität hinzu.', 'warning');
     showScreen('start');
+=======
+  if (eligible.length === 0) {
+    showScreen("home");
+    showFeedback(
+      activities.length === 0
+        ? "Keine Aktivitäten vorhanden. Füge Aktivitäten hinzu."
+        : "Keine passenden Aktivitäten. Ändere den Modus oder füge weitere Aktivitäten hinzu.",
+      "error"
+    );
+    document.querySelector("#manage-from-home").focus();
+>>>>>>> a5685d79ab41d18bdb649289fccdaf681752e11c
     return;
   }
 
@@ -375,15 +473,37 @@ function startNewTask() {
     activity: randomActivity
   };
 
+<<<<<<< HEAD
   showTask(state.currentTask);
   showScreen('task');
   setStatus('');
+=======
+  const activity = candidates[Math.floor(Math.random() * candidates.length)];
+
+  document.querySelector("#task-number").textContent = String(number);
+  document.querySelector("#task-activity").textContent = activity.name;
+  const taskPeople = document.querySelector("#task-people");
+  taskPeople.hidden = activity.personCount === 1;
+  taskPeople.textContent = activity.personCount > 1
+    ? `Benötigte Personen: ${activity.personCount}`
+    : "";
+  document.querySelector("#task-description").textContent = getIntensityDescription(number);
+  showScreen("task");
+  showFeedback("");
+  usedActivityIds.add(activity.id);
+  renderRepeatControls();
+  if (!saveGameState()) {
+    showFeedback("Wiederholungs-Spielstand nicht gespeichert.", "warning");
+  }
+  document.querySelector("#next-task-button").focus({ preventScroll: true });
+>>>>>>> a5685d79ab41d18bdb649289fccdaf681752e11c
 }
 
 // Neue Einträge werden vor dem Speichern geprüft: leer, doppelt oder zu lang ist nicht erlaubt.
 function addActivity(event) {
   event.preventDefault();
 
+<<<<<<< HEAD
   const enteredActivity = elements.activityInput.value.trim();
 
   if (!enteredActivity) {
@@ -400,6 +520,38 @@ function addActivity(event) {
 
   const isDuplicate = state.activities.some(
     (activity) => activity.toLowerCase() === enteredActivity.toLowerCase()
+=======
+  const name = activityInput.value.trim().slice(0, MAX_ACTIVITY_LENGTH);
+  if (!name) {
+    showFeedback("Aktivität eingeben.", "error");
+    activityInput.focus();
+    return;
+  }
+
+  if (activities.some((savedActivity) => activityKey(savedActivity.name) === activityKey(name))) {
+    showFeedback("Diese Aktivität ist bereits gespeichert.", "error");
+    activityInput.focus();
+    return;
+  }
+
+  const personCount = Number(personCountInput.value);
+  if (![1, 2, 3].includes(personCount)) {
+    showFeedback("Personenzahl auswählen.", "error");
+    personCountInput.focus();
+    return;
+  }
+
+  activities.push({ id: createActivityId(), name, personCount });
+  renderActivities();
+  const saved = saveActivities();
+  activityInput.value = "";
+  personCountInput.value = "1";
+  showFeedback(
+    saved
+      ? `„${name}“ hinzugefügt.`
+      : `„${name}“ hinzugefügt, aber nicht gespeichert.`,
+    saved ? "success" : "warning"
+>>>>>>> a5685d79ab41d18bdb649289fccdaf681752e11c
   );
 
   if (isDuplicate) {
@@ -411,9 +563,19 @@ function addActivity(event) {
   state.activities.push(enteredActivity);
   saveActivities();
   renderActivities();
+<<<<<<< HEAD
   elements.activityInput.value = '';
   setFeedback('Aktivität erfolgreich hinzugefügt!', 'success');
   elements.activityInput.focus();
+=======
+  const saved = saveActivities();
+  showFeedback(
+    saved
+      ? `„${removed.name}“ gelöscht.`
+      : `„${removed.name}“ gelöscht, aber nicht gespeichert.`,
+    saved ? "success" : "warning"
+  );
+>>>>>>> a5685d79ab41d18bdb649289fccdaf681752e11c
 }
 
 function deleteActivity(indexToDelete) {
@@ -421,6 +583,7 @@ function deleteActivity(indexToDelete) {
     return;
   }
 
+<<<<<<< HEAD
   const deleted = state.activities.splice(indexToDelete, 1);
 
   if (!deleted.length) {
@@ -442,12 +605,56 @@ function registerServiceWorker() {
   if (!('serviceWorker' in navigator)) {
     return;
   }
+=======
+function updateAvoidRepeats() {
+  avoidRepeats = !avoidRepeats;
+  renderRepeatControls();
+  if (!saveGameState()) {
+    showFeedback("Einstellung nicht gespeichert.", "warning");
+  }
+}
+
+document.querySelector("#new-task-button").addEventListener("click", createTask);
+document.querySelector("#next-task-button").addEventListener("click", createTask);
+document.querySelector("#manage-from-home").addEventListener("click", () => showScreen("manage"));
+document.querySelector("#manage-home-button").addEventListener("click", () => showScreen("home"));
+document.querySelector("#task-home-button").addEventListener("click", () => showScreen("home"));
+document.querySelector("#task-home-secondary").addEventListener("click", () => showScreen("home"));
+document.querySelector("#activity-form").addEventListener("submit", addActivity);
+const rulesDialog = document.querySelector("#rules-dialog");
+document.querySelector("#rules-button").addEventListener("click", () => rulesDialog.showModal());
+rulesDialog.addEventListener("click", (event) => {
+  if (event.target === rulesDialog) {
+    rulesDialog.close();
+  }
+});
+for (const toggle of document.querySelectorAll("[data-multi-person-toggle]")) {
+  toggle.addEventListener("click", updateMultiPersonMode);
+}
+for (const toggle of document.querySelectorAll("[data-avoid-repeats-toggle]")) {
+  toggle.addEventListener("click", updateAvoidRepeats);
+}
+document.querySelector(".brand").addEventListener("click", (event) => {
+  event.preventDefault();
+  showScreen("home");
+});
+>>>>>>> a5685d79ab41d18bdb649289fccdaf681752e11c
 
   const appBaseUrl = new URL('.', window.location.href).toString();
   const serviceWorkerUrl = new URL('./sw.js', appBaseUrl).toString();
 
+<<<<<<< HEAD
   navigator.serviceWorker.register(serviceWorkerUrl, { scope: appBaseUrl }).catch(() => {
     setStatus('Der Service Worker konnte nicht registriert werden. Die App bleibt jedoch nutzbar.', 'warning');
+=======
+const isSecureAppOrigin = window.location.protocol === "https:"
+  || ["localhost", "127.0.0.1", "[::1]"].includes(window.location.hostname);
+
+if ("serviceWorker" in navigator && isSecureAppOrigin) {
+  navigator.serviceWorker.register("./sw.js").catch((error) => {
+    console.error("Die Offline-Unterstützung konnte nicht aktiviert werden.", error);
+    showFeedback("Offline-Modus nicht verfügbar.", "warning");
+>>>>>>> a5685d79ab41d18bdb649289fccdaf681752e11c
   });
 }
 
