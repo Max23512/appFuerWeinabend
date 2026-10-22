@@ -1,0 +1,13 @@
+{
+  "id": "./",
+  "name": "Lucky Act – Das Partyspiel",
+  "short_name": "Lucky Act",
+  "description": "Eine Aktivität. Eine Intensität. Kannst du sie erraten?",
+  "lang": "de",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#101018",
+  "theme_color": "#101018"
+}
