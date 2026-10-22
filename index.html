@@ -37,6 +37,21 @@
             <button class="button button-primary button-large" id="new-task-button" type="button">
               <span>Neue Aufgabe</span><span class="button-arrow" aria-hidden="true">↗</span>
             </button>
+            <button class="people-mode" type="button" data-multi-person-toggle aria-pressed="false" aria-label="Mehrpersonen-Aufgaben">
+              <span class="people-mode-copy">
+                <span class="people-mode-title">Mehrpersonen-Aufgaben</span>
+                <span class="people-mode-status">Aus – nur eine Person</span>
+              </span>
+              <span class="toggle-track" aria-hidden="true"><span class="toggle-thumb"></span></span>
+            </button>
+            <button class="people-mode repeat-mode" type="button" data-avoid-repeats-toggle aria-pressed="false" aria-label="Wiederholungen vermeiden">
+              <span class="people-mode-copy">
+                <span class="people-mode-title">Wiederholungen vermeiden</span>
+                <span class="people-mode-status">Aus – Wiederholungen erlaubt</span>
+              </span>
+              <span class="toggle-track" aria-hidden="true"><span class="toggle-thumb"></span></span>
+            </button>
+            <p class="repeat-progress" data-repeat-progress aria-live="polite"></p>
             <button class="button button-secondary" id="manage-from-home" type="button">
               <span class="button-icon" aria-hidden="true">☷</span> Aktivitäten verwalten
             </button>
@@ -56,8 +71,24 @@
             </div>
             <div class="task-divider" aria-hidden="true"><span></span></div>
             <h2 id="task-activity" class="task-activity"></h2>
+            <p id="task-people" class="task-people" hidden></p>
             <p id="task-description" class="task-description"></p>
             <p class="safe-play-note"><span aria-hidden="true">✧</span> Ausdruck zählt – bleibt immer sicher.</p>
+            <button class="people-mode task-people-mode" type="button" data-multi-person-toggle aria-pressed="false" aria-label="Mehrpersonen-Aufgaben">
+              <span class="people-mode-copy">
+                <span class="people-mode-title">Mehrpersonen-Aufgaben</span>
+                <span class="people-mode-status">Aus – nur eine Person</span>
+              </span>
+              <span class="toggle-track" aria-hidden="true"><span class="toggle-thumb"></span></span>
+            </button>
+            <button class="people-mode repeat-mode" type="button" data-avoid-repeats-toggle aria-pressed="false" aria-label="Wiederholungen vermeiden">
+              <span class="people-mode-copy">
+                <span class="people-mode-title">Wiederholungen vermeiden</span>
+                <span class="people-mode-status">Aus – Wiederholungen erlaubt</span>
+              </span>
+              <span class="toggle-track" aria-hidden="true"><span class="toggle-thumb"></span></span>
+            </button>
+            <p class="repeat-progress" data-repeat-progress aria-live="polite"></p>
             <button class="button button-primary button-large" id="next-task-button" type="button">
               <span>Nächste Aufgabe</span><span class="button-arrow" aria-hidden="true">↗</span>
             </button>
@@ -77,6 +108,14 @@
             <label for="activity-input">Neue Aktivität</label>
             <div class="input-row">
               <input id="activity-input" name="activity" type="text" maxlength="120" autocomplete="off" placeholder="z. B. Einen Popstar nachmachen">
+            </div>
+            <div class="input-options">
+              <label for="person-count-input">Benötigte Personen</label>
+              <select id="person-count-input" name="personCount">
+                <option value="1">1 Person</option>
+                <option value="2">2 Personen</option>
+                <option value="3">3 Personen</option>
+              </select>
               <button class="button button-primary add-button" type="submit"><span aria-hidden="true">＋</span><span>Aktivität hinzufügen</span></button>
             </div>
             <p class="input-hint">Bis zu 120 Zeichen. Doppelte Einträge sind nicht möglich.</p>
