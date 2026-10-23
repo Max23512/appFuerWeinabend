@@ -23,6 +23,21 @@
 
             <div class="action-stack">
               <button id="new-task-btn" class="primary-btn" type="button">Neue Aufgabe</button>
+              <button class="mode-toggle" type="button" data-team-mode aria-pressed="false">
+                <span class="mode-copy">
+                  <span class="mode-title">Team-Aufgaben</span>
+                  <span class="mode-status">Aus – nur Einzelaufgaben</span>
+                </span>
+                <span class="toggle-track" aria-hidden="true"><span class="toggle-thumb"></span></span>
+              </button>
+              <button class="mode-toggle" type="button" data-avoid-repeats aria-pressed="false">
+                <span class="mode-copy">
+                  <span class="mode-title">Wiederholungen vermeiden</span>
+                  <span class="mode-status">Aus – Wiederholungen erlaubt</span>
+                </span>
+                <span class="toggle-track" aria-hidden="true"><span class="toggle-thumb"></span></span>
+              </button>
+              <p class="repeat-progress" data-repeat-progress aria-live="polite"></p>
               <button id="manage-activities-btn" class="secondary-btn" type="button">Aktivitäten verwalten</button>
             </div>
 
@@ -35,6 +50,7 @@
             <p class="eyebrow">Deine Aufgabe</p>
             <div id="task-number" class="task-number" aria-live="polite">8/10</div>
             <h2 id="task-activity" class="task-activity">Ein Tier nachmachen</h2>
+            <p id="task-people" class="task-people">1 Person</p>
             <p id="task-intensity" class="task-intensity">Hohe Intensität – sehr ausdrucksstark darstellen!</p>
 
             <div class="action-stack">
@@ -57,6 +73,12 @@
                 placeholder="Neue Aktivität eingeben"
                 autocomplete="off"
               />
+              <label for="person-count-input">Benötigte Personen</label>
+              <select id="person-count-input" name="personCount">
+                <option value="1">1 Person</option>
+                <option value="2">2 Personen</option>
+                <option value="3">3 Personen</option>
+              </select>
               <button id="add-activity-btn" class="primary-btn small-btn" type="submit">Aktivität hinzufügen</button>
             </form>
 
@@ -77,8 +99,16 @@
       </main>
 
       <p id="global-status" class="global-status" aria-live="polite"></p>
+      <footer class="site-footer">
+        <button class="footer-button" id="rules-button" type="button">Regeln</button>
+        <button class="footer-button" type="button">Impressum</button>
+      </footer>
     </div>
 
+    <dialog class="rules-dialog" id="rules-dialog" aria-label="Regeln">
+      <button class="rules-close" type="button" aria-label="Schließen">×</button>
+      <p>Alles, was sich wie Schummeln anfühlt, ist Schummeln.</p>
+    </dialog>
     <script src="script.js" defer></script>
   </body>
 </html>

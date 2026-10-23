@@ -1,6 +1,8 @@
 const STORAGE_KEY = 'luckyActActivities';
 const STORAGE_VERSION_KEY = 'luckyActActivitiesVersion';
-const STORAGE_VERSION = 3;
+const STORAGE_VERSION = 7;
+const GAME_STATE_KEY = 'luckyActGameState';
+let activityIdCounter = 0;
 const DEFAULT_ACTIVITIES = [
   'Imitiere ein Auto, das beim ersten Startversuch nicht anspringt.',
   'Stelle dar, wie ein Auto an einer roten Ampel quietschend abbremst.',
@@ -92,7 +94,36 @@ const DEFAULT_ACTIVITIES = [
   'Spiele vor, dass du einen Regenschirm bei einem plötzlichen Windstoß festhalten musst.',
   'Stelle dar, wie du bei einem überraschenden Feuerwerk den Himmel bewunderst.',
   'Spiele eine Person, die einen verlorenen Gegenstand unter dem Sofa entdeckt und erleichtert aufatmet.',
+  'Freiwillig: Erzähle von einem Date, bei dem etwas Unerwartetes oder Peinliches passiert ist.',
+  'Freiwillig: Gestehe eine harmlose Angewohnheit, die du sonst lieber für dich behältst.',
+  'Wenn alle Beteiligten einverstanden sind: Mach einer Person deiner Wahl ein ehrliches, konkretes Kompliment.',
+  'Freiwillig: Halte einen zehnsekündigen Werbevortrag für etwas völlig Alltägliches, das du gerade siehst.',
+  'Freiwillig: Teile eine kleine Sache, die du dich schon lange einmal trauen wolltest, aber noch nicht getan hast.',
+  'Oma beim Breakdance',
+  'Elefant beim Staubsaugen',
+  'Mücke in der Schwerelosigkeit',
+  'Model mit extrem engen Schuhen',
+  'Löwe beim Schlafwandeln',
+  'Tollpatschiger Geheimagent',
+  'Padberg imitieren',
+  'Beim Weinabend ausgesperrt sein',
+  'Durch Schnee stapfen',
+  'Einen großen Ast schneiden',
+  'Die Person links von dir imitieren',
+  'Hund ausführen: Der Hund zieht an der Leine, schnuppert überall und rennt plötzlich los, während sein Herrchen oder Frauchen hinterhergezogen wird.',
+  'Die Achterbahn: Drei Personen sitzen gedanklich hintereinander. Sie fahren langsam den Berg hoch, während die Spannung steigt, schauen oben nach unten und reagieren gemeinsam mit vollem Körpereinsatz auf Kurven, Loopings und rasante Abfahrten.',
+  'Die OP am offenen Herzen: Eine Person liegt als Patient auf dem Operationstisch. Zwei Chirurgen operieren konzentriert, reichen sich imaginäres OP-Besteck, tupfen sich den Schweiß von der Stirn und geraten kurz in Panik, als der unsichtbare Herzmonitor piept.',
 ];
+const TEAM_ACTIVITY_PERSON_COUNTS = new Map([
+  [DEFAULT_ACTIVITIES[37], 3],
+  [DEFAULT_ACTIVITIES[44], 3],
+  [DEFAULT_ACTIVITIES[48], 2],
+  [DEFAULT_ACTIVITIES[52], 2],
+  [DEFAULT_ACTIVITIES[92], 2],
+  [DEFAULT_ACTIVITIES[106], 2],
+  [DEFAULT_ACTIVITIES[107], 3],
+  [DEFAULT_ACTIVITIES[108], 3]
+]);
 
 const LEGACY_ACTIVITY_REPLACEMENTS = new Map([
   ['Ein Tier nachmachen', 'Imitiere eine Katze, die laut miaut, weil ihr Futternapf leer ist.'],
@@ -109,12 +140,17 @@ const LEGACY_ACTIVITY_REPLACEMENTS = new Map([
   ['Einen unsichtbaren Gegenstand benutzen', 'Stelle dar, wie du in einer überfüllten Tasche hektisch nach deinem Schlüssel suchst.'],
   ['Eine Person darstellen, die etwas nicht versteht', 'Stelle eine Person dar, die ein kompliziertes Rezept liest und die nächste Zutat abmisst.'],
   ['Eine Alltagssituation pantomimisch vorspielen', 'Stelle dar, wie du den Bus knapp verpasst und ihm enttäuscht nachsiehst.'],
-  ['Eine übertriebene Siegesfeier darstellen', 'Spiele eine Bowling-Spielerin, die alle Pins mit einem Wurf umwirft.']
+  ['Eine übertriebene Siegesfeier darstellen', 'Spiele eine Bowling-Spielerin, die alle Pins mit einem Wurf umwirft.'],
+  ['Die Achterbahn: Drei Personen sitzen gedanklich hintereinander, fahren langsam einen Berg hoch und reagieren gemeinsam mit vollem Körpereinsatz auf Kurven, Loopings und rasante Abfahrten.', DEFAULT_ACTIVITIES[107]],
+  ['Die OP am offenen Herzen: Eine Person liegt als Patient auf dem Operationstisch, während zwei Chirurgen gemeinsam operieren, sich Besteck reichen, den Schweiß abtupfen und auf einen piependen Herzmonitor reagieren.', DEFAULT_ACTIVITIES[108]]
 ]);
 
 const state = {
   activities: [],
-  currentTask: null
+  currentTask: null,
+  teamMode: false,
+  avoidRepeats: false,
+  usedActivityIds: new Set()
 };
 
 const elements = {
@@ -136,11 +172,90 @@ const elements = {
   globalStatus: document.getElementById('global-status'),
   taskNumber: document.getElementById('task-number'),
   taskActivity: document.getElementById('task-activity'),
-  taskIntensity: document.getElementById('task-intensity')
+  taskIntensity: document.getElementById('task-intensity'),
+  taskPeople: document.getElementById('task-people'),
+  personCountInput: document.getElementById('person-count-input'),
+  rulesDialog: document.getElementById('rules-dialog')
 };
 
+function createActivityId() {
+  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+    return crypto.randomUUID();
+  }
+
+  activityIdCounter += 1;
+  return `activity-${Date.now()}-${activityIdCounter}-${Math.random().toString(36).slice(2)}`;
+}
+
+function normalizeActivities(values) {
+  const ids = new Set();
+  const names = new Set();
+
+  return values
+    .map((value) => {
+      const activity = typeof value === 'string'
+        ? { name: value, personCount: TEAM_ACTIVITY_PERSON_COUNTS.get(value) || 1 }
+        : value;
+      if (!activity || typeof activity.name !== 'string' || !activity.name.trim()) {
+        return null;
+      }
+
+      const name = activity.name.trim();
+      const normalizedName = name.toLocaleLowerCase();
+      if (names.has(normalizedName)) {
+        return null;
+      }
+      names.add(normalizedName);
+
+      let id = typeof activity.id === 'string' && activity.id
+        ? activity.id
+        : createActivityId();
+      while (ids.has(id)) {
+        id = createActivityId();
+      }
+      ids.add(id);
+
+      return {
+        id,
+        name,
+        personCount: [1, 2, 3].includes(activity.personCount)
+          ? activity.personCount
+          : TEAM_ACTIVITY_PERSON_COUNTS.get(name) || 1
+      };
+    })
+    .filter(Boolean);
+}
+
+function upgradeActivities(activities) {
+  const upgraded = activities.map((activity) => {
+    if (typeof activity === 'string') {
+      return LEGACY_ACTIVITY_REPLACEMENTS.get(activity) || activity;
+    }
+
+    if (!activity || typeof activity.name !== 'string') {
+      return activity;
+    }
+
+    const replacement = LEGACY_ACTIVITY_REPLACEMENTS.get(activity.name);
+    return replacement ? { ...activity, name: replacement } : activity;
+  });
+  const knownNames = new Set(upgraded.map((activity) => (
+    typeof activity === 'string' ? activity : activity?.name
+  )).filter((name) => typeof name === 'string').map((name) => name.trim().toLocaleLowerCase()));
+
+  DEFAULT_ACTIVITIES.forEach((activity) => {
+    const normalizedName = activity.toLocaleLowerCase();
+    if (!knownNames.has(normalizedName)) {
+      upgraded.push(activity);
+      knownNames.add(normalizedName);
+    }
+  });
+
+  return upgraded;
+}
+
 function getDefaultActivities() {
-  return [...DEFAULT_ACTIVITIES];
+  return normalizeActivities(DEFAULT_ACTIVITIES);
 }
 
 function setStatus(message, type = 'info') {
@@ -202,23 +317,27 @@ function loadActivities() {
       return state.activities;
     }
 
-    const storedActivities = parsed
-      .map((item) => String(item).trim())
-      .filter((item) => item.length > 0);
+    const storedVersion = Number.parseInt(localStorage.getItem(STORAGE_VERSION_KEY) || '0', 10);
 
-    if (storedActivities.length === 0) {
+    if (parsed.length === 0) {
       state.activities = getDefaultActivities();
       saveActivities({ silent: true });
       return state.activities;
     }
 
-    const storedVersion = Number.parseInt(localStorage.getItem(STORAGE_VERSION_KEY) || '0', 10);
-
+    let activitiesToLoad = (!Number.isFinite(storedVersion) || storedVersion < 3)
+      && parsed.every((item) => typeof item === 'string')
+      ? migrateActivities(parsed.map((item) => (
+        typeof item === 'string' ? item.trim() : item?.name?.trim()
+      )).filter(Boolean))
+      : parsed;
     if (!Number.isFinite(storedVersion) || storedVersion < STORAGE_VERSION) {
-      state.activities = migrateActivities(storedActivities);
-      saveActivities({ silent: true });
-    } else {
-      state.activities = storedActivities;
+      activitiesToLoad = upgradeActivities(activitiesToLoad);
+    }
+    state.activities = normalizeActivities(activitiesToLoad);
+    state.usedActivityIds.clear();
+    if (!saveActivities({ silent: true })) {
+      setStatus('Aktivitäten konnten nicht gespeichert werden.', 'warning');
     }
 
     return state.activities;
@@ -270,12 +389,80 @@ function saveActivities(options = {}) {
   }
 }
 
+function saveGameState() {
+  try {
+    localStorage.setItem(GAME_STATE_KEY, JSON.stringify({
+      teamMode: state.teamMode,
+      avoidRepeats: state.avoidRepeats,
+      usedActivityIds: [...state.usedActivityIds]
+    }));
+    return true;
+  } catch (error) {
+    console.error('Der Spielstand konnte nicht gespeichert werden.', error);
+    return false;
+  }
+}
+
+function loadGameState() {
+  try {
+    const stored = localStorage.getItem(GAME_STATE_KEY);
+    if (stored === null) {
+      return;
+    }
+
+    const parsed = JSON.parse(stored);
+    state.teamMode = parsed.teamMode === true;
+    state.avoidRepeats = parsed.avoidRepeats === true;
+    if (Array.isArray(parsed.usedActivityIds)) {
+      const validIds = new Set(state.activities.map((activity) => activity.id));
+      parsed.usedActivityIds.forEach((id) => {
+        if (typeof id === 'string' && validIds.has(id)) {
+          state.usedActivityIds.add(id);
+        }
+      });
+    }
+  } catch (error) {
+    console.error('Der gespeicherte Spielstand konnte nicht geladen werden.', error);
+    setStatus('Der gespeicherte Spielstand war nicht lesbar.', 'warning');
+  }
+}
+
+function eligibleActivities() {
+  return state.teamMode
+    ? state.activities
+    : state.activities.filter((activity) => activity.personCount === 1);
+}
+
+function renderModeControls() {
+  document.querySelectorAll('[data-team-mode]').forEach((button) => {
+    button.setAttribute('aria-pressed', String(state.teamMode));
+    button.querySelector('.mode-status').textContent = state.teamMode
+      ? 'An – Einzel- und Team-Aufgaben'
+      : 'Aus – nur Einzelaufgaben';
+  });
+  document.querySelectorAll('[data-avoid-repeats]').forEach((button) => {
+    button.setAttribute('aria-pressed', String(state.avoidRepeats));
+    button.querySelector('.mode-status').textContent = state.avoidRepeats
+      ? 'An – keine Wiederholungen'
+      : 'Aus – Wiederholungen erlaubt';
+  });
+
+  const eligible = eligibleActivities();
+  const usedCount = eligible.filter((activity) => state.usedActivityIds.has(activity.id)).length;
+  document.querySelectorAll('[data-repeat-progress]').forEach((progress) => {
+    progress.textContent = state.avoidRepeats && eligible.length
+      ? `Bereits gezogen: ${usedCount} von ${eligible.length}`
+      : '';
+  });
+}
+
 function updateActivityCount() {
   const count = state.activities.length;
   const label = count === 1 ? 'gespeicherte Aktivität' : 'gespeicherte Aktivitäten';
 
   elements.startActivityCount.textContent = `${count} ${label}`;
   elements.activityCounter.textContent = String(count);
+  renderModeControls();
 }
 
 function renderActivities() {
@@ -294,16 +481,22 @@ function renderActivities() {
   state.activities.forEach((activity, index) => {
     const listItem = document.createElement('li');
     const text = document.createElement('span');
-    text.textContent = activity;
+    text.textContent = activity.name;
+    const peopleCount = document.createElement('span');
+    peopleCount.className = 'activity-people-count';
+    peopleCount.textContent = activity.personCount === 1
+      ? '1 Person'
+      : `${activity.personCount} Personen`;
 
     const deleteButton = document.createElement('button');
     deleteButton.type = 'button';
     deleteButton.className = 'delete-btn';
-    deleteButton.setAttribute('aria-label', `Aktivität löschen: ${activity}`);
+    deleteButton.setAttribute('aria-label', `Aktivität löschen: ${activity.name}`);
     deleteButton.dataset.index = String(index);
     deleteButton.textContent = '×';
 
     listItem.appendChild(text);
+    listItem.appendChild(peopleCount);
     listItem.appendChild(deleteButton);
     fragment.appendChild(listItem);
   });
@@ -375,9 +568,8 @@ function getRandomNumber() {
   return selectedNumber;
 }
 
-function getRandomActivity() {
-  const randomIndex = Math.floor(Math.random() * state.activities.length);
-  return state.activities[randomIndex];
+function activitiesForPersonCount(activities, personCount) {
+  return activities.filter((activity) => activity.personCount === personCount);
 }
 
 function getIntensityDescription(number) {
@@ -402,29 +594,57 @@ function getIntensityDescription(number) {
 
 function showTask(task) {
   elements.taskNumber.textContent = `${task.number}/10`;
-  elements.taskActivity.textContent = task.activity;
+  elements.taskActivity.textContent = task.activity.name;
+  elements.taskPeople.textContent = task.activity.personCount === 1
+    ? '1 Person'
+    : `${task.activity.personCount} Personen`;
   elements.taskIntensity.textContent = getIntensityDescription(task.number);
 }
 
-// Eine neue Aufgabe entsteht nur durch einen bewussten Klick auf den Button.
 function startNewTask() {
-  if (state.activities.length === 0) {
-    setStatus('Es ist noch keine Aktivität gespeichert. Bitte füge zuerst eine Aktivität hinzu.', 'warning');
+  const eligible = eligibleActivities();
+  if (eligible.length === 0) {
+    const message = state.activities.length === 0
+      ? 'Keine Aktivitäten vorhanden. Füge zuerst eine Aktivität hinzu.'
+      : 'Keine passenden Aktivitäten. Aktiviere Team-Aufgaben oder füge Einzelaufgaben hinzu.';
+    setStatus(message, 'warning');
     showScreen('start');
     return;
   }
 
+  let candidates = state.avoidRepeats
+    ? eligible.filter((activity) => !state.usedActivityIds.has(activity.id))
+    : eligible;
+  if (state.avoidRepeats && candidates.length === 0) {
+    eligible.forEach((activity) => state.usedActivityIds.delete(activity.id));
+    candidates = eligible;
+  }
+
+  const soloActivities = activitiesForPersonCount(candidates, 1);
+  const teamActivities = candidates.filter((activity) => activity.personCount > 1);
+  const chooseTeam = state.teamMode
+    && teamActivities.length > 0
+    && (soloActivities.length === 0 || Math.random() < 1 / 6);
+  const activityCandidates = chooseTeam
+    ? teamActivities
+    : soloActivities.length > 0 ? soloActivities : teamActivities;
+  const activity = activityCandidates[Math.floor(Math.random() * activityCandidates.length)];
   const randomNumber = getRandomNumber();
-  const randomActivity = getRandomActivity();
 
   state.currentTask = {
     number: randomNumber,
-    activity: randomActivity
+    activity
   };
 
   showTask(state.currentTask);
   showScreen('task');
-  setStatus('');
+  state.usedActivityIds.add(activity.id);
+  renderModeControls();
+  if (!saveGameState()) {
+    setStatus('Der Spielstand konnte nicht gespeichert werden.', 'warning');
+  } else {
+    setStatus('');
+  }
 }
 
 // Neue Einträge werden vor dem Speichern geprüft: leer, doppelt oder zu lang ist nicht erlaubt.
@@ -446,7 +666,7 @@ function addActivity(event) {
   }
 
   const isDuplicate = state.activities.some(
-    (activity) => activity.toLowerCase() === enteredActivity.toLowerCase()
+    (activity) => activity.name.toLowerCase() === enteredActivity.toLowerCase()
   );
 
   if (isDuplicate) {
@@ -455,10 +675,22 @@ function addActivity(event) {
     return;
   }
 
-  state.activities.push(enteredActivity);
+  const personCount = Number(elements.personCountInput.value);
+  if (![1, 2, 3].includes(personCount)) {
+    setFeedback('Bitte wähle eine gültige Personenzahl.', 'error');
+    elements.personCountInput.focus();
+    return;
+  }
+
+  state.activities.push({
+    id: createActivityId(),
+    name: enteredActivity,
+    personCount
+  });
   saveActivities();
   renderActivities();
   elements.activityInput.value = '';
+  elements.personCountInput.value = '1';
   setFeedback('Aktivität erfolgreich hinzugefügt!', 'success');
   elements.activityInput.focus();
 }
@@ -474,8 +706,10 @@ function deleteActivity(indexToDelete) {
     return;
   }
 
+  state.usedActivityIds.delete(deleted[0].id);
   saveActivities();
   renderActivities();
+  saveGameState();
 
   if (state.activities.length === 0) {
     setFeedback('Alle Aktivitäten wurden gelöscht. Die Liste ist jetzt leer.', 'warning');
@@ -509,8 +743,29 @@ function handleActivityListClick(event) {
   deleteActivity(index);
 }
 
+function updateTeamMode() {
+  state.teamMode = !state.teamMode;
+  renderModeControls();
+  if (!saveGameState()) {
+    setStatus('Die Einstellung konnte nicht gespeichert werden.', 'warning');
+  } else {
+    setStatus('');
+  }
+}
+
+function updateRepeatMode() {
+  state.avoidRepeats = !state.avoidRepeats;
+  renderModeControls();
+  if (!saveGameState()) {
+    setStatus('Die Einstellung konnte nicht gespeichert werden.', 'warning');
+  } else {
+    setStatus('');
+  }
+}
+
 function initApp() {
   loadActivities();
+  loadGameState();
   renderActivities();
   showScreen('start');
   updateActivityCount();
@@ -533,6 +788,23 @@ function initApp() {
   });
   elements.activityForm.addEventListener('submit', addActivity);
   elements.activityList.addEventListener('click', handleActivityListClick);
+  document.querySelectorAll('[data-team-mode]').forEach((button) => {
+    button.addEventListener('click', updateTeamMode);
+  });
+  document.querySelectorAll('[data-avoid-repeats]').forEach((button) => {
+    button.addEventListener('click', updateRepeatMode);
+  });
+  document.querySelector('#rules-button').addEventListener('click', () => {
+    elements.rulesDialog.showModal();
+  });
+  elements.rulesDialog.querySelector('.rules-close').addEventListener('click', () => {
+    elements.rulesDialog.close();
+  });
+  elements.rulesDialog.addEventListener('click', (event) => {
+    if (event.target === elements.rulesDialog) {
+      elements.rulesDialog.close();
+    }
+  });
 
   registerServiceWorker();
 }
