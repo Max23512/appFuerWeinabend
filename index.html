@@ -4,92 +4,105 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <meta name="theme-color" content="#0f172a" />
-    <title>Lucky Act</title>
+    <title>Party Mix</title>
     <link rel="manifest" href="manifest.json" />
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
     <div class="app-shell">
       <header class="top-bar">
-        <div class="app-brand">Lucky Act</div>
+        <div class="app-brand">Party Mix</div>
       </header>
 
       <main class="screen-container">
-        <section id="start-screen" class="screen active" aria-labelledby="start-title">
+        <section id="home-screen" class="screen active" aria-labelledby="home-title">
           <div class="card">
-            <p class="eyebrow">Partyspiel</p>
-            <h1 id="start-title">Lucky Act</h1>
-            <p class="subtitle">Eine Aktivität. Eine Intensität. Kannst du sie erraten?</p>
+            <p class="eyebrow">Partyspiele für ein gemeinsames Handy</p>
+            <h1 id="home-title">Party Mix</h1>
+            <p class="subtitle">Mehrere Spiele. Eine App. Eine Runde.</p>
 
-            <div class="action-stack">
-              <button id="new-task-btn" class="primary-btn" type="button">Neue Aufgabe</button>
-              <button class="mode-toggle" type="button" data-team-mode aria-pressed="false">
-                <span class="mode-copy">
-                  <span class="mode-title">Team-Aufgaben</span>
-                  <span class="mode-status">Aus – nur Einzelaufgaben</span>
+            <div id="mode-grid" class="mode-grid" aria-label="Spielmodi"></div>
+
+            <div class="settings-stack">
+              <button class="mode-toggle" type="button" data-setting="team-mode" aria-pressed="false">
+                <span class="toggle-copy">
+                  <span class="toggle-title">Team-Aufgaben</span>
+                  <span class="toggle-status">Aus – nur Einzelaufgaben</span>
                 </span>
                 <span class="toggle-track" aria-hidden="true"><span class="toggle-thumb"></span></span>
               </button>
-              <button class="mode-toggle" type="button" data-avoid-repeats aria-pressed="false">
-                <span class="mode-copy">
-                  <span class="mode-title">Wiederholungen vermeiden</span>
-                  <span class="mode-status">Aus – Wiederholungen erlaubt</span>
+
+              <button class="mode-toggle" type="button" data-setting="avoid-repeats" aria-pressed="false">
+                <span class="toggle-copy">
+                  <span class="toggle-title">Wiederholungen vermeiden</span>
+                  <span class="toggle-status">Aus – Wiederholungen erlaubt</span>
                 </span>
                 <span class="toggle-track" aria-hidden="true"><span class="toggle-thumb"></span></span>
               </button>
-              <p class="repeat-progress" data-repeat-progress aria-live="polite"></p>
-              <button id="manage-activities-btn" class="secondary-btn" type="button">Aktivitäten verwalten</button>
+
+              <p id="repeat-progress" class="repeat-progress" aria-live="polite"></p>
+              <button id="manage-btn" class="secondary-btn" type="button">Aufgaben verwalten</button>
             </div>
 
-            <p id="start-activity-count" class="activity-count" aria-live="polite"></p>
+            <p id="activity-count" class="activity-count" aria-live="polite"></p>
           </div>
         </section>
 
-        <section id="task-screen" class="screen" aria-live="polite">
+        <section id="challenge-screen" class="screen" aria-live="polite">
           <div class="card task-card">
-            <p class="eyebrow">Deine Aufgabe</p>
-            <div id="task-number" class="task-number" aria-live="polite">8/10</div>
-            <h2 id="task-activity" class="task-activity">Ein Tier nachmachen</h2>
-            <p id="task-people" class="task-people">1 Person</p>
-            <p id="task-intensity" class="task-intensity">Hohe Intensität – sehr ausdrucksstark darstellen!</p>
+            <p class="eyebrow">Lucky Act Challenge</p>
+            <div id="challenge-number" class="task-number">1/10</div>
+            <h2 id="challenge-task" class="task-activity">Aufgabe</h2>
+            <p id="challenge-people" class="task-people">1 Person</p>
+            <p id="challenge-intensity" class="task-intensity">Intensität</p>
 
             <div class="action-stack">
-              <button id="next-task-btn" class="primary-btn" type="button">Nächste Aufgabe</button>
-              <button id="back-to-start-btn" class="secondary-btn" type="button">Zurück zum Start</button>
+              <button id="next-challenge-btn" class="primary-btn" type="button">Nächste Challenge</button>
+              <button id="challenge-back-btn" class="secondary-btn" type="button">Zurück zum Start</button>
+            </div>
+          </div>
+        </section>
+
+        <section id="game-screen" class="screen" aria-live="polite">
+          <div class="card game-card">
+            <p class="eyebrow">Spielmodus</p>
+            <h2 id="game-title">Frage</h2>
+            <p id="game-description" class="subtitle small-subtitle"></p>
+            <div id="game-content" class="game-content"></div>
+
+            <div class="action-stack game-actions">
+              <button id="game-next-btn" class="primary-btn" type="button">Nächste Runde</button>
+              <button id="game-back-btn" class="secondary-btn" type="button">Zurück zum Hauptmenü</button>
             </div>
           </div>
         </section>
 
         <section id="manage-screen" class="screen" aria-labelledby="manage-title">
           <div class="card">
-            <h2 id="manage-title">Aktivitäten verwalten</h2>
+            <h2 id="manage-title">Aufgaben verwalten</h2>
 
-            <form id="activity-form" class="activity-form" novalidate>
-              <label class="sr-only" for="activity-input">Neue Aktivität</label>
-              <input
-                id="activity-input"
-                type="text"
-                maxlength="120"
-                placeholder="Neue Aktivität eingeben"
-                autocomplete="off"
-              />
-              <label for="person-count-input">Benötigte Personen</label>
-              <select id="person-count-input" name="personCount">
+            <form id="task-form" class="task-form" novalidate>
+              <label class="sr-only" for="task-input">Neue Challenge</label>
+              <input id="task-input" type="text" maxlength="120" placeholder="Neue Challenge eingeben" autocomplete="off" />
+
+              <label for="task-person-count">Benötigte Personen</label>
+              <select id="task-person-count" name="personCount">
                 <option value="1">1 Person</option>
                 <option value="2">2 Personen</option>
                 <option value="3">3 Personen</option>
               </select>
-              <button id="add-activity-btn" class="primary-btn small-btn" type="submit">Aktivität hinzufügen</button>
+
+              <button id="add-task-btn" class="primary-btn small-btn" type="submit">Challenge hinzufügen</button>
             </form>
 
-            <p id="activity-feedback" class="feedback" aria-live="polite"></p>
+            <p id="task-feedback" class="feedback" aria-live="polite"></p>
 
-            <div class="activities-header">
-              <h3>Gespeicherte Aktivitäten</h3>
-              <span id="activity-counter" class="chip" aria-live="polite">0</span>
+            <div class="list-header">
+              <h3>Gespeicherte Challenges</h3>
+              <span id="task-counter" class="chip" aria-live="polite">0</span>
             </div>
 
-            <ul id="activity-list" class="activity-list" aria-live="polite"></ul>
+            <ul id="task-list" class="task-list" aria-live="polite"></ul>
 
             <div class="action-stack">
               <button id="manage-back-btn" class="secondary-btn" type="button">Zurück zum Start</button>
@@ -99,16 +112,26 @@
       </main>
 
       <p id="global-status" class="global-status" aria-live="polite"></p>
+
       <footer class="site-footer">
         <button class="footer-button" id="rules-button" type="button">Regeln</button>
-        <button class="footer-button" type="button">Impressum</button>
+        <button class="footer-button" id="imprint-button" type="button">Impressum</button>
       </footer>
     </div>
 
-    <dialog class="rules-dialog" id="rules-dialog" aria-label="Regeln">
-      <button class="rules-close" type="button" aria-label="Schließen">×</button>
+    <dialog id="rules-dialog" class="info-dialog" aria-label="Regeln">
+      <button class="dialog-close" type="button" aria-label="Schließen">×</button>
       <p>Alles, was sich wie Schummeln anfühlt, ist Schummeln.</p>
     </dialog>
+
+    <dialog id="imprint-dialog" class="info-dialog" aria-label="Impressum">
+      <button class="dialog-close" type="button" aria-label="Schließen">×</button>
+      <h2>Impressum</h2>
+      <p>Party Mix</p>
+      <p>Eine lokale Partyspiel-App für gemeinsame Abende.</p>
+      <p>Kein externer Server, keine Anmeldung, keine Datenbank.</p>
+    </dialog>
+
     <script src="script.js" defer></script>
   </body>
 </html>

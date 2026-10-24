@@ -1,264 +1,220 @@
-const STORAGE_KEY = 'luckyActActivities';
-const STORAGE_VERSION_KEY = 'luckyActActivitiesVersion';
-const STORAGE_VERSION = 7;
-const GAME_STATE_KEY = 'luckyActGameState';
-let activityIdCounter = 0;
-const DEFAULT_ACTIVITIES = [
-  'Imitiere ein Auto, das beim ersten Startversuch nicht anspringt.',
-  'Stelle dar, wie ein Auto an einer roten Ampel quietschend abbremst.',
-  'Imitiere ein Motorrad, das an einer Kreuzung losfährt und davonbraust.',
-  'Mache das Geräusch eines Zuges nach, der langsam im Bahnhof einfährt.',
-  'Stelle pantomimisch dar, wie ein Busfahrer die Türen schließt und losfährt.',
-  'Imitiere ein Fahrrad, dessen Klingel zweimal kurz läutet.',
-  'Mache ein Flugzeug nach, das über dir hinwegfliegt und leiser wird.',
-  'Imitiere eine Katze, die laut miaut, weil ihr Futternapf leer ist.',
-  'Stelle einen Hund dar, der sich nach einem Regenschauer trocken schüttelt.',
-  'Mache den Ruf eines Kuckucks dreimal hintereinander nach.',
-  'Imitiere einen Frosch, der an einem Teich quakt.',
-  'Stelle eine Ente dar, die watschelnd zum Wasser geht und quakt.',
-  'Imitiere eine Eule, die nachts von einem Ast aus ruft.',
-  'Mache das Geräusch eines tropfenden Wasserhahns nach, der immer schneller tropft.',
-  'Imitiere einen Wecker, der morgens klingelt und dann ausgeschaltet wird.',
-  'Stelle dar, wie du einen hartnäckigen Schluckauf loswerden willst.',
-  'Spiele vor, dass du niesen musst, es aber immer wieder unterdrückst.',
-  'Stelle dar, wie du auf eine frisch aufgeschnittene, sehr saure Zitrone beißt.',
-  'Spiele vor, dass du dich über ein unerwartetes Geburtstagsgeschenk freust.',
-  'Stelle dar, wie du den Bus knapp verpasst und ihm enttäuscht nachsiehst.',
-  'Spiele vor, dass du im Fahrstuhl den falschen Knopf drückst und auf der falschen Etage aussteigst.',
-  'Spiele vor, dass du einen wichtigen Namen vergessen hast und ihn zu erraten versuchst.',
-  'Stelle dar, wie du eine Fliege verscheuchst, die immer wieder um dich herumfliegt.',
-  'Spiele vor, dass du ein Geheimnis erzählen willst, aber bemerkst, dass jemand zuhört.',
-  'Stelle dar, wie du versuchst, während einer ernsten Ansprache nicht zu lachen.',
-  'Spiele vor, dass du dich auf Zehenspitzen an einer knarrenden Tür vorbeischleichst.',
-  'Stelle dar, wie du einen viel zu schweren Koffer über eine kurze Strecke ziehst.',
-  'Spiele vor, dass du mit nassen Händen eine Türklinke öffnen möchtest.',
-  'Stelle dar, wie du in einer überfüllten Tasche hektisch nach deinem Schlüssel suchst.',
-  'Spiele vor, dass du ein unsichtbares Geschenk vorsichtig auspackst und überrascht bist.',
-  'Stelle dar, wie du auf glattem Boden vorsichtig das Gleichgewicht hältst.',
-  'Spiele eine Barista-Person, die einen Cappuccino zubereitet und den Milchschaum verziert.',
-  'Stelle eine Wettermoderatorin dar, die einen überraschenden Sturm ankündigt.',
-  'Spiele einen Nachrichtensprecher, der eine Eilmeldung besonders ernst vorliest.',
-  'Stelle eine Zugbegleiterin dar, die eine Verspätung freundlich durchsagt.',
-  'Spiele einen Museumsführer, der ein unsichtbares Gemälde besonders feierlich erklärt.',
-  'Stelle eine Köchin dar, die eine Suppe probiert und noch eine Prise Salz hinzufügt.',
-  'Spiele einen Fotografen, der eine Gruppe für ein gemeinsames Foto arrangiert.',
-  'Stelle eine Bibliothekarin dar, die jemanden freundlich um Ruhe bittet.',
-  'Spiele einen Detektiv, der eine einzelne Fußspur entdeckt und untersucht.',
-  'Stelle eine Zauberin dar, die ein imaginäres Tuch verschwinden lässt.',
-  'Spiele einen Piraten, der auf einer Schatzkarte den eingezeichneten X-Punkt findet.',
-  'Stelle eine Astronautin dar, die in Zeitlupe durch die Schwerelosigkeit schwebt.',
-  'Spiele einen Roboter mit fast leerem Akku, der immer langsamer wird.',
-  'Stelle einen Dirigenten dar, der ein Orchester erst leise und dann laut spielen lässt.',
-  'Spiele einen Sportreporter, der ein Tor in der letzten Spielsekunde kommentiert.',
-  'Stelle einen Tennisspieler dar, der aufschlägt und den Punkt gewinnt.',
-  'Spiele eine Basketballspielerin, die einen Freiwurf trifft und sich über den Punkt freut.',
-  'Stelle einen Fußballtorwart dar, der einen Elfmeter hält.',
-  'Spiele eine Bowling-Spielerin, die alle Pins mit einem Wurf umwirft.',
-  'Stelle einen Golfer dar, der einen kurzen Putt konzentriert ins Loch spielt.',
-  'Spiele einen Skifahrer, der vorsichtig durch zwei Slalomstangen fährt.',
-  'Stelle eine Tischtennisspielerin dar, die einen schnellen Ballwechsel gewinnt.',
-  'Spiele einen Boxer, der sich vor einem imaginären Kampf aufwärmt.',
-  'Stelle eine Läuferin dar, die nach einem Rennen die Ziellinie überquert.',
-  'Spiele einen Angler, der einen schweren Fisch an Land zieht.',
-  'Stelle eine Person dar, die beim Yoga in den Baumstand kommt und das Gleichgewicht hält.',
-  'Spiele einen Musiker, der vor dem Auftritt nervös seine Gitarre stimmt.',
-  'Stelle eine Opernsängerin dar, die einen besonders hohen Ton hält.',
-  'Spiele einen Schlagzeuger, der ein kurzes, mitreißendes Solo spielt.',
-  'Stelle einen DJ dar, der einen Songwechsel ankündigt und den Einsatz gibt.',
-  'Spiele eine Person, die bei Karaoke den Refrain ihres Lieblingslieds begeistert singt.',
-  'Stelle einen Straßenmusiker dar, der nach einem gelungenen Stück sein Publikum grüßt.',
-  'Spiele eine Balletttänzerin, die vor einem imaginären Auftritt ihre Position einnimmt.',
-  'Stelle einen Breakdancer dar, der eine einfache Drehung beendet und eine Pose hält.',
-  'Spiele einen Schauspieler, der bei einer Preisverleihung eine Dankesrede hält.',
-  'Stelle eine Person dar, die bei einem Konzert den Lieblingssong erkennt und mitsingt.',
-  'Spiele einen Stand-up-Comedian, der nach einer Pointe auf die Reaktion des Publikums wartet.',
-  'Stelle dar, wie du ein zu heißes Stück Pizza vorsichtig abkühlst, bevor du hineinbeißt.',
-  'Spiele vor, dass du eine große Spaghetti-Nudel auf die Gabel drehst und probierst.',
-  'Stelle dar, wie du eine Eiswaffel isst, bevor sie in der Sonne schmilzt.',
-  'Spiele vor, dass du einen prickelnden Sprudel trinkst und überrascht aufstoßen musst.',
-  'Stelle dar, wie du beim Kochen einen Topfdeckel anhebst und vom Dampf überrascht wirst.',
-  'Spiele vor, dass du eine sehr scharfe Chili probierst und sofort nach Wasser suchst.',
-  'Stelle dar, wie du einen viel zu großen Bissen nimmst und langsam kauen musst.',
-  'Spiele vor, dass du beim Öffnen einer Getränkedose vom Zischen überrascht wirst.',
-  'Stelle eine Person dar, die ein kompliziertes Rezept liest und die nächste Zutat abmisst.',
-  'Spiele vor, dass du einen Kuchen aus dem Ofen holst und stolz das Ergebnis präsentierst.',
-  'Stelle dar, wie du im Dunkeln nach dem Lichtschalter tastest und ihn endlich findest.',
-  'Spiele vor, dass du eine Nachricht auf dem Handy liest und mit einem breiten Grinsen reagierst.',
-  'Stelle dar, wie du eine viel zu lange Sprachnachricht anhörst und ungeduldig wirst.',
-  'Spiele vor, dass du bei einem Videoanruf bemerkst, dass dein Mikrofon ausgeschaltet ist.',
-  'Stelle dar, wie du einen Papierflieger faltest und seinen Flug gespannt verfolgst.',
-  'Spiele vor, dass du einen Luftballon aufbläst und ihn vorsichtig verknotest.',
-  'Stelle dar, wie du eine Geburtstagskerze auspustest und auf den Wunsch wartest.',
-  'Spiele vor, dass du beim Gesellschaftsspiel kurz vor dem Ziel stehst und die letzte Zahl würfelst.',
-  'Stelle eine Person dar, die beim ersten Versuch ein Schloss mit dem richtigen Schlüssel öffnet.',
-  'Spiele vor, dass du einen Regenschirm bei einem plötzlichen Windstoß festhalten musst.',
-  'Stelle dar, wie du bei einem überraschenden Feuerwerk den Himmel bewunderst.',
-  'Spiele eine Person, die einen verlorenen Gegenstand unter dem Sofa entdeckt und erleichtert aufatmet.',
-  'Freiwillig: Erzähle von einem Date, bei dem etwas Unerwartetes oder Peinliches passiert ist.',
-  'Freiwillig: Gestehe eine harmlose Angewohnheit, die du sonst lieber für dich behältst.',
-  'Wenn alle Beteiligten einverstanden sind: Mach einer Person deiner Wahl ein ehrliches, konkretes Kompliment.',
-  'Freiwillig: Halte einen zehnsekündigen Werbevortrag für etwas völlig Alltägliches, das du gerade siehst.',
-  'Freiwillig: Teile eine kleine Sache, die du dich schon lange einmal trauen wolltest, aber noch nicht getan hast.',
-  'Oma beim Breakdance',
-  'Elefant beim Staubsaugen',
-  'Mücke in der Schwerelosigkeit',
-  'Model mit extrem engen Schuhen',
-  'Löwe beim Schlafwandeln',
-  'Tollpatschiger Geheimagent',
-  'Padberg imitieren',
-  'Beim Weinabend ausgesperrt sein',
-  'Durch Schnee stapfen',
-  'Einen großen Ast schneiden',
-  'Die Person links von dir imitieren',
-  'Hund ausführen: Der Hund zieht an der Leine, schnuppert überall und rennt plötzlich los, während sein Herrchen oder Frauchen hinterhergezogen wird.',
-  'Die Achterbahn: Drei Personen sitzen gedanklich hintereinander. Sie fahren langsam den Berg hoch, während die Spannung steigt, schauen oben nach unten und reagieren gemeinsam mit vollem Körpereinsatz auf Kurven, Loopings und rasante Abfahrten.',
-  'Die OP am offenen Herzen: Eine Person liegt als Patient auf dem Operationstisch. Zwei Chirurgen operieren konzentriert, reichen sich imaginäres OP-Besteck, tupfen sich den Schweiß von der Stirn und geraten kurz in Panik, als der unsichtbare Herzmonitor piept.',
-];
-const TEAM_ACTIVITY_PERSON_COUNTS = new Map([
-  [DEFAULT_ACTIVITIES[37], 3],
-  [DEFAULT_ACTIVITIES[44], 3],
-  [DEFAULT_ACTIVITIES[48], 2],
-  [DEFAULT_ACTIVITIES[52], 2],
-  [DEFAULT_ACTIVITIES[92], 2],
-  [DEFAULT_ACTIVITIES[106], 2],
-  [DEFAULT_ACTIVITIES[107], 3],
-  [DEFAULT_ACTIVITIES[108], 3]
-]);
+const STORAGE_TASKS_KEY = 'partyMixChallengeTasks';
+const STORAGE_SETTINGS_KEY = 'partyMixSettings';
 
-const LEGACY_ACTIVITY_REPLACEMENTS = new Map([
-  ['Ein Tier nachmachen', 'Imitiere eine Katze, die laut miaut, weil ihr Futternapf leer ist.'],
-  ['Einen Roboter darstellen', 'Spiele einen Roboter mit fast leerem Akku, der immer langsamer wird.'],
-  ['Einen Motor imitieren', 'Imitiere ein Auto, das beim ersten Startversuch nicht anspringt.'],
-  ['Eine berühmte Person darstellen', 'Spiele einen Nachrichtensprecher, der eine Eilmeldung besonders ernst vorliest.'],
-  ['Einen Sportler darstellen', 'Stelle einen Tennisspieler dar, der aufschlägt und den Punkt gewinnt.'],
-  ['Eine Person darstellen, die sich erschreckt', 'Spiele vor, dass du beim Öffnen einer Getränkedose vom Zischen überrascht wirst.'],
-  ['Einen Gegenstand pantomimisch erklären', 'Stelle dar, wie du einen Papierflieger faltest und seinen Flug gespannt verfolgst.'],
-  ['So tun, als würde man einen schweren Gegenstand tragen', 'Stelle dar, wie du einen viel zu schweren Koffer über eine kurze Strecke ziehst.'],
-  ['Einen Filmcharakter darstellen', 'Spiele einen Detektiv, der eine einzelne Fußspur entdeckt und untersucht.'],
-  ['Eine Person darstellen, die sich sehr freut', 'Spiele vor, dass du dich über ein unerwartetes Geburtstagsgeschenk freust.'],
-  ['Wie ein bestimmtes Fahrzeug klingen', 'Mache das Geräusch eines Zuges nach, der langsam im Bahnhof einfährt.'],
-  ['Einen unsichtbaren Gegenstand benutzen', 'Stelle dar, wie du in einer überfüllten Tasche hektisch nach deinem Schlüssel suchst.'],
-  ['Eine Person darstellen, die etwas nicht versteht', 'Stelle eine Person dar, die ein kompliziertes Rezept liest und die nächste Zutat abmisst.'],
-  ['Eine Alltagssituation pantomimisch vorspielen', 'Stelle dar, wie du den Bus knapp verpasst und ihm enttäuscht nachsiehst.'],
-  ['Eine übertriebene Siegesfeier darstellen', 'Spiele eine Bowling-Spielerin, die alle Pins mit einem Wurf umwirft.'],
-  ['Die Achterbahn: Drei Personen sitzen gedanklich hintereinander, fahren langsam einen Berg hoch und reagieren gemeinsam mit vollem Körpereinsatz auf Kurven, Loopings und rasante Abfahrten.', DEFAULT_ACTIVITIES[107]],
-  ['Die OP am offenen Herzen: Eine Person liegt als Patient auf dem Operationstisch, während zwei Chirurgen gemeinsam operieren, sich Besteck reichen, den Schweiß abtupfen und auf einen piependen Herzmonitor reagieren.', DEFAULT_ACTIVITIES[108]]
-]);
+const MODE_DEFINITIONS = [
+  {
+    id: 'challenge',
+    title: 'Lucky Act Challenge',
+    icon: '🎲',
+    description: 'Aufgabe und Intensität ziehen',
+    kind: 'challenge'
+  },
+  {
+    id: 'would-you-rather',
+    title: 'Wer würde eher ...?',
+    icon: '🤔',
+    description: 'Schnelle Entscheidungen für die ganze Gruppe',
+    kind: 'generic'
+  },
+  {
+    id: 'either-or',
+    title: 'Entweder oder',
+    icon: '⚖️',
+    description: 'Kurz und kontrovers',
+    kind: 'generic'
+  },
+  {
+    id: 'pantomime',
+    title: 'Pantomime',
+    icon: '🎭',
+    description: 'Begriffe nur durch Bewegung erklären',
+    kind: 'generic'
+  },
+  {
+    id: 'sound-guess',
+    title: 'Geräusche raten',
+    icon: '🔊',
+    description: 'Nur Klang, kein Wort',
+    kind: 'generic'
+  },
+  {
+    id: 'number-guess',
+    title: 'Zahlen-Schätzung',
+    icon: '🔢',
+    description: 'Schätze und prüfe danach',
+    kind: 'generic'
+  }
+];
+
+const DEFAULT_CHALLENGE_TASKS = [
+  { id: 'c-001', text: 'Imitiere ein Auto, das beim ersten Startversuch nicht anspringt.', personCount: 1 },
+  { id: 'c-002', text: 'Stelle ein verrücktes Tier dar, das im Supermarkt nach Futter sucht.', personCount: 1 },
+  { id: 'c-003', text: 'Mache das Geräusch eines Zuges nach, der im Bahnhof langsam einfährt.', personCount: 1 },
+  { id: 'c-004', text: 'Spiele einen Roboter mit fast leerem Akku, der immer langsamer wird.', personCount: 1 },
+  { id: 'c-005', text: 'Stelle eine Katze dar, die laut miaut, weil ihr Napf leer ist.', personCount: 1 },
+  { id: 'c-006', text: 'Spiele eine Person, die in einer überfüllten Tasche hektisch nach dem Schlüssel sucht.', personCount: 1 },
+  { id: 'c-007', text: 'Mache den Ruf eines Kuckucks dreimal hintereinander nach.', personCount: 1 },
+  { id: 'c-008', text: 'Stelle eine Bibliothekarin dar, die jemanden freundlich um Ruhe bittet.', personCount: 1 },
+  { id: 'c-009', text: 'Spiele einen Sportreporter, der ein Tor in der letzten Sekunde kommentiert.', personCount: 1 },
+  { id: 'c-010', text: 'Stelle eine Person dar, die eine Geburtstagskerze auspustet und einen Wunsch erwartet.', personCount: 1 },
+  { id: 'c-011', text: 'Spiele „Hund ausführen“: ein Spieler ist der Hund, ein anderer der Besitzer.', personCount: 2 },
+  { id: 'c-012', text: 'Stelle die Achterbahn dar: drei Spieler fahren gemeinsam die Kurven und Loopings durch.', personCount: 3 },
+  { id: 'c-013', text: 'Spiele eine Person, die mit nassen Händen verzweifelt eine Türklinke öffnet.', personCount: 1 },
+  { id: 'c-014', text: 'Stelle einen DJ dar, der einen Songwechsel ankündigt und den Einsatz gibt.', personCount: 1 },
+  { id: 'c-015', text: 'Spiele eine Opernsängerin, die einen besonders hohen Ton hält.', personCount: 1 },
+  { id: 'c-016', text: 'Stelle einen Angler dar, der mit großem Einsatz einen schweren Fisch an Land zieht.', personCount: 1 },
+  { id: 'c-017', text: 'Spiele eine Tänzerin, die vor dem Auftritt nervös ihre Schuhe überprüft.', personCount: 1 },
+  { id: 'c-018', text: 'Stelle eine Person dar, die auf einem glatten Boden vorsichtig das Gleichgewicht hält.', personCount: 1 },
+  { id: 'c-019', text: 'Spiele ein Paar, das versucht, ein unsichtbares Geschenk vorsichtig zu öffnen.', personCount: 2 },
+  { id: 'c-020', text: 'Stelle die OP am offenen Herzen dar: ein Patient und zwei Chirurgen operieren gemeinsam.', personCount: 3 },
+  { id: 'c-021', text: 'Spiele vor, dass du beim Öffnen einer Dose von einem lauten Zischen überrascht wirst.', personCount: 1 },
+  { id: 'c-022', text: 'Stelle einen sehr nervösen Koch dar, der ein Rezept laut liest und Zutaten abmisst.', personCount: 1 },
+  { id: 'c-023', text: 'Spiele einen Verkäufer, der einem Kunden ein völlig unsinniges Produkt anpreist.', personCount: 2 },
+  { id: 'c-024', text: 'Mache das Geräusch eines Luftballons nach, der laut aufpufft und dann plötzlich flach wird.', personCount: 1 },
+  { id: 'c-025', text: 'Stelle eine Person dar, die auf Zehenspitzen an einer knarrenden Tür vorbeischleicht.', personCount: 1 },
+  { id: 'c-026', text: 'Spiele eine Person, die beim Erkennen eines Lieblingsliedes in den Beat mitwirft.', personCount: 1 },
+  { id: 'c-027', text: 'Stelle einen Spaziergänger dar, der von einer unsichtbaren Fliege verfolgt wird.', personCount: 1 },
+  { id: 'c-028', text: 'Spiele im Team eine sehr langsame, aber sehr wichtige Bautätigkeit ohne Werkzeuge.', personCount: 2 },
+  { id: 'c-029', text: 'Mache ein Feuerwehrfahrzeug nach, das mit lautem Signal aus der Garage fährt.', personCount: 1 },
+  { id: 'c-030', text: 'Stelle eine Person dar, die einen superheißen Keks vorsichtig abkühlt, bevor sie hineinbeißt.', personCount: 1 }
+];
+
+const WOULD_YOU_RATHER_QUESTIONS = [
+  { question: 'Wer würde eher ein ganzes Wochenende ohne Handy überstehen?', optionA: 'Spieler 1', optionB: 'Spieler 2' },
+  { question: 'Wer würde eher eine ganze Nacht mit Musik und Tanzen verbringen?', optionA: 'Spieler 1', optionB: 'Spieler 2' },
+  { question: 'Wer würde eher zufällig auf einer Party anfangen, ein Lied solo zu singen?', optionA: 'Spieler 1', optionB: 'Spieler 2' },
+  { question: 'Wer würde eher eine Woche nur Pizza essen?', optionA: 'Spieler 1', optionB: 'Spieler 2' },
+  { question: 'Wer würde eher eine verrückte Idee sofort umsetzen?', optionA: 'Spieler 1', optionB: 'Spieler 2' },
+  { question: 'Wer würde eher im Sommer mit offenem Fenster schlafen?', optionA: 'Spieler 1', optionB: 'Spieler 2' }
+];
+
+const EITHER_OR_QUESTIONS = [
+  { question: 'Kaffeetrinken oder Teetrinken?', choices: ['Kaffee', 'Tee'] },
+  { question: 'Wandern oder Konzert?', choices: ['Wandern', 'Konzert'] },
+  { question: 'Urlaub am Meer oder in den Bergen?', choices: ['Meer', 'Berge'] },
+  { question: 'Pizza oder Pasta?', choices: ['Pizza', 'Pasta'] },
+  { question: 'Lange Nacht oder ruhiger Abend zu Hause?', choices: ['Lange Nacht', 'Ruhiger Abend'] }
+];
+
+const PANTOMIME_WORDS = [
+  'Kuh',
+  'Schlüsselsuche',
+  'Tee kochen',
+  'Mikrowelle',
+  'Schneeball',
+  'Fahrrad',
+  'Trommel',
+  'Salat machen',
+  'Bügeleisen',
+  'Kaffeefilter'
+];
+
+const SOUND_WORDS = [
+  'Hund',
+  'Katze',
+  'Kaffeemaschine',
+  'Zug',
+  'Toaster',
+  'Fahrradklingel',
+  'Regenschirm',
+  'Mikrofon',
+  'Luftballon',
+  'Rasierer'
+];
+
+const ESTIMATION_QUESTIONS = [
+  {
+    prompt: 'Wie viele Sekunden hat eine Minute?',
+    answer: 60,
+    explanation: 'Eine Minute hat genau 60 Sekunden.'
+  },
+  {
+    prompt: 'Wie viele Tage hat eine Woche?',
+    answer: 7,
+    explanation: 'Eine Woche hat 7 Tage.'
+  },
+  {
+    prompt: 'Wie viele Finger hat eine Hand?',
+    answer: 5,
+    explanation: 'Eine Hand hat normalerweise 5 Finger.'
+  },
+  {
+    prompt: 'Wie viele Minuten sind eine Stunde?',
+    answer: 60,
+    explanation: 'Eine Stunde hat 60 Minuten.'
+  },
+  {
+    prompt: 'Wie viele Seiten hat ein normales Blatt Papier?',
+    answer: 2,
+    explanation: 'Ein Blatt hat eine Vorderseite und eine Rückseite.'
+  }
+];
 
 const state = {
-  activities: [],
-  currentTask: null,
+  currentMode: null,
+  challengeTasks: [],
+  currentChallenge: null,
   teamMode: false,
   avoidRepeats: false,
-  usedActivityIds: new Set()
+  usedChallengeIds: new Set(),
+  currentGeneric: null,
+  genericHistory: {
+    'would-you-rather': new Set(),
+    'either-or': new Set(),
+    pantomime: new Set(),
+    'sound-guess': new Set(),
+    'number-guess': new Set()
+  }
 };
 
 const elements = {
-  startScreen: document.getElementById('start-screen'),
-  taskScreen: document.getElementById('task-screen'),
+  homeScreen: document.getElementById('home-screen'),
+  challengeScreen: document.getElementById('challenge-screen'),
+  gameScreen: document.getElementById('game-screen'),
   manageScreen: document.getElementById('manage-screen'),
-  newTaskButton: document.getElementById('new-task-btn'),
-  manageActivitiesButton: document.getElementById('manage-activities-btn'),
-  backToStartButton: document.getElementById('back-to-start-btn'),
-  nextTaskButton: document.getElementById('next-task-btn'),
-  manageBackButton: document.getElementById('manage-back-btn'),
-  activityForm: document.getElementById('activity-form'),
-  activityInput: document.getElementById('activity-input'),
-  addActivityButton: document.getElementById('add-activity-btn'),
-  activityList: document.getElementById('activity-list'),
-  activityCounter: document.getElementById('activity-counter'),
-  startActivityCount: document.getElementById('start-activity-count'),
-  activityFeedback: document.getElementById('activity-feedback'),
+  modeGrid: document.getElementById('mode-grid'),
+  activityCount: document.getElementById('activity-count'),
+  repeatProgress: document.getElementById('repeat-progress'),
+  taskInput: document.getElementById('task-input'),
+  taskPersonCount: document.getElementById('task-person-count'),
+  taskForm: document.getElementById('task-form'),
+  taskList: document.getElementById('task-list'),
+  taskCounter: document.getElementById('task-counter'),
+  taskFeedback: document.getElementById('task-feedback'),
+  manageBtn: document.getElementById('manage-btn'),
   globalStatus: document.getElementById('global-status'),
-  taskNumber: document.getElementById('task-number'),
-  taskActivity: document.getElementById('task-activity'),
-  taskIntensity: document.getElementById('task-intensity'),
-  taskPeople: document.getElementById('task-people'),
-  personCountInput: document.getElementById('person-count-input'),
-  rulesDialog: document.getElementById('rules-dialog')
+  challengeNumber: document.getElementById('challenge-number'),
+  challengeTask: document.getElementById('challenge-task'),
+  challengePeople: document.getElementById('challenge-people'),
+  challengeIntensity: document.getElementById('challenge-intensity'),
+  nextChallengeBtn: document.getElementById('next-challenge-btn'),
+  challengeBackBtn: document.getElementById('challenge-back-btn'),
+  gameTitle: document.getElementById('game-title'),
+  gameDescription: document.getElementById('game-description'),
+  gameContent: document.getElementById('game-content'),
+  gameNextBtn: document.getElementById('game-next-btn'),
+  gameBackBtn: document.getElementById('game-back-btn'),
+  manageBackBtn: document.getElementById('manage-back-btn'),
+  rulesButton: document.getElementById('rules-button'),
+  rulesDialog: document.getElementById('rules-dialog'),
+  imprintButton: document.getElementById('imprint-button'),
+  imprintDialog: document.getElementById('imprint-dialog')
 };
 
-function createActivityId() {
-  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
-    return crypto.randomUUID();
-  }
+function showScreen(screenId) {
+  const screens = [
+    elements.homeScreen,
+    elements.challengeScreen,
+    elements.gameScreen,
+    elements.manageScreen
+  ];
 
-  activityIdCounter += 1;
-  return `activity-${Date.now()}-${activityIdCounter}-${Math.random().toString(36).slice(2)}`;
-}
-
-function normalizeActivities(values) {
-  const ids = new Set();
-  const names = new Set();
-
-  return values
-    .map((value) => {
-      const activity = typeof value === 'string'
-        ? { name: value, personCount: TEAM_ACTIVITY_PERSON_COUNTS.get(value) || 1 }
-        : value;
-      if (!activity || typeof activity.name !== 'string' || !activity.name.trim()) {
-        return null;
-      }
-
-      const name = activity.name.trim();
-      const normalizedName = name.toLocaleLowerCase();
-      if (names.has(normalizedName)) {
-        return null;
-      }
-      names.add(normalizedName);
-
-      let id = typeof activity.id === 'string' && activity.id
-        ? activity.id
-        : createActivityId();
-      while (ids.has(id)) {
-        id = createActivityId();
-      }
-      ids.add(id);
-
-      return {
-        id,
-        name,
-        personCount: [1, 2, 3].includes(activity.personCount)
-          ? activity.personCount
-          : TEAM_ACTIVITY_PERSON_COUNTS.get(name) || 1
-      };
-    })
-    .filter(Boolean);
-}
-
-function upgradeActivities(activities) {
-  const upgraded = activities.map((activity) => {
-    if (typeof activity === 'string') {
-      return LEGACY_ACTIVITY_REPLACEMENTS.get(activity) || activity;
-    }
-
-    if (!activity || typeof activity.name !== 'string') {
-      return activity;
-    }
-
-    const replacement = LEGACY_ACTIVITY_REPLACEMENTS.get(activity.name);
-    return replacement ? { ...activity, name: replacement } : activity;
+  screens.forEach((screen) => {
+    screen.classList.toggle('active', screen.id === screenId);
   });
-  const knownNames = new Set(upgraded.map((activity) => (
-    typeof activity === 'string' ? activity : activity?.name
-  )).filter((name) => typeof name === 'string').map((name) => name.trim().toLocaleLowerCase()));
-
-  DEFAULT_ACTIVITIES.forEach((activity) => {
-    const normalizedName = activity.toLocaleLowerCase();
-    if (!knownNames.has(normalizedName)) {
-      upgraded.push(activity);
-      knownNames.add(normalizedName);
-    }
-  });
-
-  return upgraded;
 }
 
-function getDefaultActivities() {
-  return normalizeActivities(DEFAULT_ACTIVITIES);
-}
-
-function setStatus(message, type = 'info') {
+function setGlobalStatus(message, type = 'info') {
   if (!message) {
     elements.globalStatus.textContent = '';
     elements.globalStatus.removeAttribute('data-type');
@@ -269,544 +225,546 @@ function setStatus(message, type = 'info') {
   elements.globalStatus.setAttribute('data-type', type);
 }
 
-function setFeedback(message, type = 'info') {
+function setTaskFeedback(message, type = 'info') {
   if (!message) {
-    elements.activityFeedback.textContent = '';
-    elements.activityFeedback.removeAttribute('data-type');
+    elements.taskFeedback.textContent = '';
+    elements.taskFeedback.removeAttribute('data-type');
     return;
   }
 
-  elements.activityFeedback.textContent = message;
-  elements.activityFeedback.setAttribute('data-type', type);
+  elements.taskFeedback.textContent = message;
+  elements.taskFeedback.setAttribute('data-type', type);
 }
 
-function storageAvailable() {
+function getRandomItem(items) {
+  return items[Math.floor(Math.random() * items.length)];
+}
+
+function getHistoryForMode(modeId) {
+  return state.genericHistory[modeId] || new Set();
+}
+
+function pickReusableGenericItem(modeId, items) {
+  const history = getHistoryForMode(modeId);
+  const remaining = items.filter((item) => !history.has(item));
+  const selected = remaining.length ? getRandomItem(remaining) : getRandomItem(items);
+
+  if (typeof selected === 'string') {
+    history.add(selected);
+  } else {
+    history.add(selected.question || selected.prompt || JSON.stringify(selected));
+  }
+
+  if (history.size > items.length + 2) {
+    history.clear();
+  }
+
+  return selected;
+}
+
+function normalizeTaskArray(values) {
+  return values
+    .map((task) => {
+      if (!task || typeof task.text !== 'string') {
+        return null;
+      }
+
+      const text = task.text.trim();
+      if (!text) {
+        return null;
+      }
+
+      const personCount = [1, 2, 3].includes(task.personCount) ? task.personCount : 1;
+
+      return {
+        id: typeof task.id === 'string' && task.id ? task.id : `task-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+        text,
+        personCount
+      };
+    })
+    .filter(Boolean);
+}
+
+function loadChallengeTasks() {
   try {
-    const testKey = '__luckyActStorageTest__';
-    localStorage.setItem(testKey, '1');
-    localStorage.removeItem(testKey);
-    return true;
-  } catch (error) {
-    return false;
-  }
-}
-
-// Die gespeicherten Aktivitäten kommen aus dem lokalen Browser-Speicher.
-// Wenn noch nichts gespeicherte ist, laden wir die Standardliste.
-function loadActivities() {
-  if (!storageAvailable()) {
-    state.activities = getDefaultActivities();
-    setStatus('Der lokale Speicher ist nicht verfügbar. Änderungen bleiben nur für diese Sitzung erhalten.', 'warning');
-    return state.activities;
-  }
-
-  try {
-    const stored = localStorage.getItem(STORAGE_KEY);
-
-    if (stored === null) {
-      state.activities = getDefaultActivities();
-      saveActivities({ silent: true });
-      return state.activities;
-    }
-
-    const parsed = JSON.parse(stored);
-
-    if (!Array.isArray(parsed)) {
-      state.activities = getDefaultActivities();
-      saveActivities({ silent: true });
-      return state.activities;
-    }
-
-    const storedVersion = Number.parseInt(localStorage.getItem(STORAGE_VERSION_KEY) || '0', 10);
-
-    if (parsed.length === 0) {
-      state.activities = getDefaultActivities();
-      saveActivities({ silent: true });
-      return state.activities;
-    }
-
-    let activitiesToLoad = (!Number.isFinite(storedVersion) || storedVersion < 3)
-      && parsed.every((item) => typeof item === 'string')
-      ? migrateActivities(parsed.map((item) => (
-        typeof item === 'string' ? item.trim() : item?.name?.trim()
-      )).filter(Boolean))
-      : parsed;
-    if (!Number.isFinite(storedVersion) || storedVersion < STORAGE_VERSION) {
-      activitiesToLoad = upgradeActivities(activitiesToLoad);
-    }
-    state.activities = normalizeActivities(activitiesToLoad);
-    state.usedActivityIds.clear();
-    if (!saveActivities({ silent: true })) {
-      setStatus('Aktivitäten konnten nicht gespeichert werden.', 'warning');
-    }
-
-    return state.activities;
-  } catch (error) {
-    state.activities = getDefaultActivities();
-    saveActivities({ silent: true });
-    setStatus('Die gespeicherten Aktivitäten konnten nicht gelesen werden. Die Standardliste wurde wiederhergestellt.', 'warning');
-    return state.activities;
-  }
-}
-
-function migrateActivities(activities) {
-  const migratedActivities = activities.map(
-    (activity) => LEGACY_ACTIVITY_REPLACEMENTS.get(activity) || activity
-  );
-  const existingActivities = new Set(migratedActivities.map((activity) => activity.toLowerCase()));
-
-  DEFAULT_ACTIVITIES.forEach((activity) => {
-    const normalizedActivity = activity.toLowerCase();
-
-    if (!existingActivities.has(normalizedActivity)) {
-      migratedActivities.push(activity);
-      existingActivities.add(normalizedActivity);
-    }
-  });
-
-  return migratedActivities;
-}
-
-function saveActivities(options = {}) {
-  const { silent = false } = options;
-
-  if (!storageAvailable()) {
-    if (!silent) {
-      setFeedback('Die Änderungen konnten nicht dauerhaft gespeichert werden. Die App funktioniert aber für diese Sitzung weiter.', 'warning');
-    }
-    return false;
-  }
-
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(state.activities));
-    localStorage.setItem(STORAGE_VERSION_KEY, String(STORAGE_VERSION));
-    return true;
-  } catch (error) {
-    if (!silent) {
-      setFeedback('Die Aktivitäten konnten nicht gespeichert werden. Bitte prüfe den verfügbaren Speicherplatz.', 'error');
-    }
-    return false;
-  }
-}
-
-function saveGameState() {
-  try {
-    localStorage.setItem(GAME_STATE_KEY, JSON.stringify({
-      teamMode: state.teamMode,
-      avoidRepeats: state.avoidRepeats,
-      usedActivityIds: [...state.usedActivityIds]
-    }));
-    return true;
-  } catch (error) {
-    console.error('Der Spielstand konnte nicht gespeichert werden.', error);
-    return false;
-  }
-}
-
-function loadGameState() {
-  try {
-    const stored = localStorage.getItem(GAME_STATE_KEY);
-    if (stored === null) {
+    const saved = localStorage.getItem(STORAGE_TASKS_KEY);
+    if (!saved) {
+      state.challengeTasks = normalizeTaskArray(DEFAULT_CHALLENGE_TASKS);
+      saveChallengeTasks(true);
       return;
     }
 
-    const parsed = JSON.parse(stored);
-    state.teamMode = parsed.teamMode === true;
-    state.avoidRepeats = parsed.avoidRepeats === true;
-    if (Array.isArray(parsed.usedActivityIds)) {
-      const validIds = new Set(state.activities.map((activity) => activity.id));
-      parsed.usedActivityIds.forEach((id) => {
-        if (typeof id === 'string' && validIds.has(id)) {
-          state.usedActivityIds.add(id);
-        }
-      });
+    const parsed = JSON.parse(saved);
+    if (!Array.isArray(parsed) || parsed.length === 0) {
+      state.challengeTasks = normalizeTaskArray(DEFAULT_CHALLENGE_TASKS);
+      saveChallengeTasks(true);
+      return;
+    }
+
+    state.challengeTasks = normalizeTaskArray(parsed);
+    if (state.challengeTasks.length === 0) {
+      state.challengeTasks = normalizeTaskArray(DEFAULT_CHALLENGE_TASKS);
     }
   } catch (error) {
-    console.error('Der gespeicherte Spielstand konnte nicht geladen werden.', error);
-    setStatus('Der gespeicherte Spielstand war nicht lesbar.', 'warning');
+    state.challengeTasks = normalizeTaskArray(DEFAULT_CHALLENGE_TASKS);
   }
 }
 
-function eligibleActivities() {
+function saveChallengeTasks(silent = false) {
+  try {
+    localStorage.setItem(STORAGE_TASKS_KEY, JSON.stringify(state.challengeTasks));
+    return true;
+  } catch (error) {
+    if (!silent) {
+      setTaskFeedback('Die Aufgaben konnten nicht gespeichert werden.', 'warning');
+    }
+    return false;
+  }
+}
+
+function loadSettings() {
+  try {
+    const raw = localStorage.getItem(STORAGE_SETTINGS_KEY);
+    if (!raw) {
+      return;
+    }
+
+    const parsed = JSON.parse(raw);
+    state.teamMode = parsed.teamMode === true;
+    state.avoidRepeats = parsed.avoidRepeats === true;
+  } catch (error) {
+    state.teamMode = false;
+    state.avoidRepeats = false;
+  }
+}
+
+function saveSettings() {
+  try {
+    localStorage.setItem(STORAGE_SETTINGS_KEY, JSON.stringify({
+      teamMode: state.teamMode,
+      avoidRepeats: state.avoidRepeats
+    }));
+    return true;
+  } catch (error) {
+    return false;
+  }
+}
+
+function renderSettingsButtons() {
+  document.querySelectorAll('[data-setting]').forEach((button) => {
+    const settingName = button.dataset.setting;
+    const isOn = settingName === 'team-mode' ? state.teamMode : state.avoidRepeats;
+    button.setAttribute('aria-pressed', String(isOn));
+    const status = button.querySelector('.toggle-status');
+    if (settingName === 'team-mode') {
+      status.textContent = isOn ? 'An – Einzel- und Team-Aufgaben' : 'Aus – nur Einzelaufgaben';
+    } else {
+      status.textContent = isOn ? 'An – keine Wiederholungen' : 'Aus – Wiederholungen erlaubt';
+    }
+  });
+
+  const eligible = getEligibleChallengeTasks();
+  const usedCount = eligible.filter((task) => state.usedChallengeIds.has(task.id)).length;
+  elements.repeatProgress.textContent = state.avoidRepeats && eligible.length
+    ? `Bereits gezogen: ${usedCount} von ${eligible.length}`
+    : '';
+}
+
+function updateChallengeCount() {
+  const label = state.challengeTasks.length === 1 ? 'Challenge' : 'Challenges';
+  elements.activityCount.textContent = `${state.challengeTasks.length} ${label}`;
+  elements.taskCounter.textContent = String(state.challengeTasks.length);
+  renderSettingsButtons();
+}
+
+function renderModeGrid() {
+  elements.modeGrid.innerHTML = '';
+
+  MODE_DEFINITIONS.forEach((mode) => {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'mode-card';
+    button.dataset.mode = mode.id;
+    button.innerHTML = `
+      <span class="mode-card-icon" aria-hidden="true">${mode.icon}</span>
+      <span class="mode-card-copy">
+        <span class="mode-card-title">${mode.title}</span>
+        <span class="mode-card-text">${mode.description}</span>
+      </span>
+      <span class="mode-card-action">Start</span>
+    `;
+    elements.modeGrid.appendChild(button);
+  });
+}
+
+function getEligibleChallengeTasks() {
   return state.teamMode
-    ? state.activities
-    : state.activities.filter((activity) => activity.personCount === 1);
+    ? state.challengeTasks
+    : state.challengeTasks.filter((task) => task.personCount === 1);
 }
 
-function renderModeControls() {
-  document.querySelectorAll('[data-team-mode]').forEach((button) => {
-    button.setAttribute('aria-pressed', String(state.teamMode));
-    button.querySelector('.mode-status').textContent = state.teamMode
-      ? 'An – Einzel- und Team-Aufgaben'
-      : 'Aus – nur Einzelaufgaben';
-  });
-  document.querySelectorAll('[data-avoid-repeats]').forEach((button) => {
-    button.setAttribute('aria-pressed', String(state.avoidRepeats));
-    button.querySelector('.mode-status').textContent = state.avoidRepeats
-      ? 'An – keine Wiederholungen'
-      : 'Aus – Wiederholungen erlaubt';
-  });
-
-  const eligible = eligibleActivities();
-  const usedCount = eligible.filter((activity) => state.usedActivityIds.has(activity.id)).length;
-  document.querySelectorAll('[data-repeat-progress]').forEach((progress) => {
-    progress.textContent = state.avoidRepeats && eligible.length
-      ? `Bereits gezogen: ${usedCount} von ${eligible.length}`
-      : '';
-  });
+function getIntensityDescription(number) {
+  if (number >= 1 && number <= 2) return 'Sehr geringe Intensität – sehr zurückhaltend.';
+  if (number >= 3 && number <= 4) return 'Geringe Intensität – leicht und unauffällig.';
+  if (number >= 5 && number <= 6) return 'Mittlere Intensität – deutlich erkennbar.';
+  if (number >= 7 && number <= 8) return 'Hohe Intensität – sehr ausdrucksstark!';
+  return 'Sehr hohe Intensität – besonders auffällig, aber sicher.';
 }
 
-function updateActivityCount() {
-  const count = state.activities.length;
-  const label = count === 1 ? 'gespeicherte Aktivität' : 'gespeicherte Aktivitäten';
-
-  elements.startActivityCount.textContent = `${count} ${label}`;
-  elements.activityCounter.textContent = String(count);
-  renderModeControls();
+function renderChallengeTask(task) {
+  elements.challengeNumber.textContent = `${task.number}/10`;
+  elements.challengeTask.textContent = task.task.text;
+  elements.challengePeople.textContent = task.task.personCount === 1 ? '1 Person' : `${task.task.personCount} Personen`;
+  elements.challengeIntensity.textContent = getIntensityDescription(task.number);
 }
 
-function renderActivities() {
-  elements.activityList.innerHTML = '';
-
-  if (state.activities.length === 0) {
-    const emptyItem = document.createElement('li');
-    emptyItem.innerHTML = '<span>Keine Aktivitäten gespeichert.</span>';
-    elements.activityList.appendChild(emptyItem);
-    updateActivityCount();
+function generateChallengeTask() {
+  const eligible = getEligibleChallengeTasks();
+  if (!eligible.length) {
+    setGlobalStatus('Keine passenden Challenges vorhanden. Bitte Team-Modus aktivieren oder Aufgaben hinzufügen.', 'warning');
+    showScreen('home-screen');
     return;
   }
 
-  const fragment = document.createDocumentFragment();
+  let candidates = eligible;
+  if (state.avoidRepeats) {
+    candidates = eligible.filter((task) => !state.usedChallengeIds.has(task.id));
+    if (!candidates.length) {
+      eligible.forEach((task) => state.usedChallengeIds.delete(task.id));
+      candidates = eligible;
+    }
+  }
 
-  state.activities.forEach((activity, index) => {
-    const listItem = document.createElement('li');
+  const rawTask = getRandomItem(candidates);
+  const intensity = Math.floor(Math.random() * 10) + 1;
+  const round = {
+    number: intensity,
+    task: rawTask
+  };
+
+  state.currentChallenge = round;
+  state.usedChallengeIds.add(rawTask.id);
+  renderChallengeTask(round);
+  setGlobalStatus('');
+  showScreen('challenge-screen');
+}
+
+function renderTaskList() {
+  elements.taskList.innerHTML = '';
+
+  if (!state.challengeTasks.length) {
+    const emptyItem = document.createElement('li');
+    emptyItem.innerHTML = '<span>Keine Challenges gespeichert.</span>';
+    elements.taskList.appendChild(emptyItem);
+    updateChallengeCount();
+    return;
+  }
+
+  state.challengeTasks.forEach((task) => {
+    const item = document.createElement('li');
     const text = document.createElement('span');
-    text.textContent = activity.name;
-    const peopleCount = document.createElement('span');
-    peopleCount.className = 'activity-people-count';
-    peopleCount.textContent = activity.personCount === 1
-      ? '1 Person'
-      : `${activity.personCount} Personen`;
+    text.textContent = task.text;
+
+    const meta = document.createElement('span');
+    meta.className = 'task-meta';
+    meta.textContent = task.personCount === 1 ? '1P' : `${task.personCount}P`;
 
     const deleteButton = document.createElement('button');
     deleteButton.type = 'button';
     deleteButton.className = 'delete-btn';
-    deleteButton.setAttribute('aria-label', `Aktivität löschen: ${activity.name}`);
-    deleteButton.dataset.index = String(index);
     deleteButton.textContent = '×';
+    deleteButton.setAttribute('aria-label', `Challenge löschen: ${task.text}`);
+    deleteButton.dataset.taskId = task.id;
 
-    listItem.appendChild(text);
-    listItem.appendChild(peopleCount);
-    listItem.appendChild(deleteButton);
-    fragment.appendChild(listItem);
+    item.appendChild(text);
+    item.appendChild(meta);
+    item.appendChild(deleteButton);
+    elements.taskList.appendChild(item);
   });
 
-  elements.activityList.appendChild(fragment);
-  updateActivityCount();
+  updateChallengeCount();
 }
 
-function showScreen(screenName) {
-  const screens = [
-    elements.startScreen,
-    elements.taskScreen,
-    elements.manageScreen
-  ];
-
-  screens.forEach((screen) => {
-    screen.classList.toggle('active', screen.id === `${screenName}-screen`);
-  });
-}
-
-const recentNumberHistory = [];
-
-function getRandomNumber() {
-  const recentNumbers = recentNumberHistory.slice(-4);
-  const lowNumbersRecently = recentNumbers.filter((number) => number <= 5).length;
-  const highNumbersRecently = recentNumbers.length - lowNumbersRecently;
-  const weights = [];
-  let totalWeight = 0;
-
-  for (let number = 1; number <= 10; number += 1) {
-    const lastDrawIndex = recentNumberHistory.lastIndexOf(number);
-    const drawsSince = lastDrawIndex === -1
-      ? recentNumberHistory.length
-      : recentNumberHistory.length - 1 - lastDrawIndex;
-    let weight = 1 + Math.min(drawsSince, 10) * 0.04;
-
-    if (drawsSince === 0) {
-      weight *= 0.55;
-    } else if (drawsSince === 1) {
-      weight *= 0.72;
-    } else if (drawsSince === 2) {
-      weight *= 0.85;
-    }
-
-    const recentGroupCount = number <= 5 ? lowNumbersRecently : highNumbersRecently;
-    weight *= Math.max(0.55, 1 - Math.max(0, recentGroupCount - 2) * 0.12);
-    weights.push(weight);
-    totalWeight += weight;
-  }
-
-  let randomValue = Math.random() * totalWeight;
-  let selectedNumber = 10;
-
-  for (let index = 0; index < weights.length; index += 1) {
-    randomValue -= weights[index];
-
-    if (randomValue < 0) {
-      selectedNumber = index + 1;
-      break;
-    }
-  }
-
-  recentNumberHistory.push(selectedNumber);
-
-  if (recentNumberHistory.length > 10) {
-    recentNumberHistory.shift();
-  }
-
-  return selectedNumber;
-}
-
-function activitiesForPersonCount(activities, personCount) {
-  return activities.filter((activity) => activity.personCount === personCount);
-}
-
-function getIntensityDescription(number) {
-  if (number >= 1 && number <= 2) {
-    return 'Sehr geringe Intensität – eine sehr zurückhaltende Darstellung.';
-  }
-
-  if (number >= 3 && number <= 4) {
-    return 'Geringe Intensität – eine leichte, unauffällige Darstellung.';
-  }
-
-  if (number >= 5 && number <= 6) {
-    return 'Mittlere Intensität – eine deutlich erkennbare Darstellung.';
-  }
-
-  if (number >= 7 && number <= 8) {
-    return 'Hohe Intensität – sehr ausdrucksstark darstellen!';
-  }
-
-  return 'Sehr hohe Intensität – eine besonders ausdrucksstarke Darstellung innerhalb sicherer Grenzen.';
-}
-
-function showTask(task) {
-  elements.taskNumber.textContent = `${task.number}/10`;
-  elements.taskActivity.textContent = task.activity.name;
-  elements.taskPeople.textContent = task.activity.personCount === 1
-    ? '1 Person'
-    : `${task.activity.personCount} Personen`;
-  elements.taskIntensity.textContent = getIntensityDescription(task.number);
-}
-
-function startNewTask() {
-  const eligible = eligibleActivities();
-  if (eligible.length === 0) {
-    const message = state.activities.length === 0
-      ? 'Keine Aktivitäten vorhanden. Füge zuerst eine Aktivität hinzu.'
-      : 'Keine passenden Aktivitäten. Aktiviere Team-Aufgaben oder füge Einzelaufgaben hinzu.';
-    setStatus(message, 'warning');
-    showScreen('start');
-    return;
-  }
-
-  let candidates = state.avoidRepeats
-    ? eligible.filter((activity) => !state.usedActivityIds.has(activity.id))
-    : eligible;
-  if (state.avoidRepeats && candidates.length === 0) {
-    eligible.forEach((activity) => state.usedActivityIds.delete(activity.id));
-    candidates = eligible;
-  }
-
-  const soloActivities = activitiesForPersonCount(candidates, 1);
-  const teamActivities = candidates.filter((activity) => activity.personCount > 1);
-  const chooseTeam = state.teamMode
-    && teamActivities.length > 0
-    && (soloActivities.length === 0 || Math.random() < 1 / 6);
-  const activityCandidates = chooseTeam
-    ? teamActivities
-    : soloActivities.length > 0 ? soloActivities : teamActivities;
-  const activity = activityCandidates[Math.floor(Math.random() * activityCandidates.length)];
-  const randomNumber = getRandomNumber();
-
-  state.currentTask = {
-    number: randomNumber,
-    activity
-  };
-
-  showTask(state.currentTask);
-  showScreen('task');
-  state.usedActivityIds.add(activity.id);
-  renderModeControls();
-  if (!saveGameState()) {
-    setStatus('Der Spielstand konnte nicht gespeichert werden.', 'warning');
-  } else {
-    setStatus('');
-  }
-}
-
-// Neue Einträge werden vor dem Speichern geprüft: leer, doppelt oder zu lang ist nicht erlaubt.
-function addActivity(event) {
+function addChallenge(event) {
   event.preventDefault();
 
-  const enteredActivity = elements.activityInput.value.trim();
-
-  if (!enteredActivity) {
-    setFeedback('Bitte gib eine Aktivität ein.', 'error');
-    elements.activityInput.focus();
+  const entered = elements.taskInput.value.trim();
+  if (!entered) {
+    setTaskFeedback('Bitte gib eine Challenge ein.', 'error');
+    elements.taskInput.focus();
     return;
   }
 
-  if (enteredActivity.length > 120) {
-    setFeedback('Die Aktivität darf maximal 120 Zeichen lang sein.', 'error');
-    elements.activityInput.focus();
+  if (entered.length > 120) {
+    setTaskFeedback('Die Challenge darf maximal 120 Zeichen lang sein.', 'error');
+    elements.taskInput.focus();
     return;
   }
 
-  const isDuplicate = state.activities.some(
-    (activity) => activity.name.toLowerCase() === enteredActivity.toLowerCase()
-  );
-
-  if (isDuplicate) {
-    setFeedback('Diese Aktivität ist bereits gespeichert.', 'error');
-    elements.activityInput.focus();
+  const duplicate = state.challengeTasks.some((task) => task.text.toLowerCase() === entered.toLowerCase());
+  if (duplicate) {
+    setTaskFeedback('Diese Challenge ist bereits gespeichert.', 'error');
+    elements.taskInput.focus();
     return;
   }
 
-  const personCount = Number(elements.personCountInput.value);
-  if (![1, 2, 3].includes(personCount)) {
-    setFeedback('Bitte wähle eine gültige Personenzahl.', 'error');
-    elements.personCountInput.focus();
-    return;
-  }
-
-  state.activities.push({
-    id: createActivityId(),
-    name: enteredActivity,
-    personCount
+  const personCount = Number(elements.taskPersonCount.value);
+  state.challengeTasks.push({
+    id: `task-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+    text: entered,
+    personCount: [1, 2, 3].includes(personCount) ? personCount : 1
   });
-  saveActivities();
-  renderActivities();
-  elements.activityInput.value = '';
-  elements.personCountInput.value = '1';
-  setFeedback('Aktivität erfolgreich hinzugefügt!', 'success');
-  elements.activityInput.focus();
+
+  saveChallengeTasks();
+  renderTaskList();
+  elements.taskInput.value = '';
+  elements.taskPersonCount.value = '1';
+  setTaskFeedback('Challenge erfolgreich hinzugefügt.', 'success');
+  elements.taskInput.focus();
 }
 
-function deleteActivity(indexToDelete) {
-  if (Number.isNaN(indexToDelete)) {
+function deleteChallenge(taskId) {
+  const index = state.challengeTasks.findIndex((task) => task.id === taskId);
+  if (index === -1) {
     return;
   }
 
-  const deleted = state.activities.splice(indexToDelete, 1);
+  const [removed] = state.challengeTasks.splice(index, 1);
+  state.usedChallengeIds.delete(removed.id);
+  saveChallengeTasks();
+  renderTaskList();
+  setTaskFeedback('Challenge gelöscht.', 'success');
+}
 
-  if (!deleted.length) {
+function renderWouldYouRather() {
+  const question = pickReusableGenericItem('would-you-rather', WOULD_YOU_RATHER_QUESTIONS);
+  elements.gameContent.innerHTML = `
+    <div class="prompt-card">
+      <p class="prompt-label">Frage</p>
+      <h3>${question.question}</h3>
+      <div class="choice-grid">
+        <button type="button" class="choice-btn" data-choice="A">${question.optionA}</button>
+        <button type="button" class="choice-btn" data-choice="B">${question.optionB}</button>
+      </div>
+    </div>
+  `;
+}
+
+function renderEitherOr() {
+  const question = pickReusableGenericItem('either-or', EITHER_OR_QUESTIONS);
+  elements.gameContent.innerHTML = `
+    <div class="prompt-card">
+      <p class="prompt-label">Entscheidung</p>
+      <h3>${question.question}</h3>
+      <div class="choice-grid">
+        <button type="button" class="choice-btn" data-choice="A">${question.choices[0]}</button>
+        <button type="button" class="choice-btn" data-choice="B">${question.choices[1]}</button>
+      </div>
+    </div>
+  `;
+}
+
+function renderPantomime() {
+  const word = pickReusableGenericItem('pantomime', PANTOMIME_WORDS);
+  elements.gameContent.innerHTML = `
+    <div class="word-card">
+      <p class="game-label">Aktiver Spieler</p>
+      <div class="big-word">${word}</div>
+      <p class="note">Nur der aktive Spieler darf den Begriff sehen. Die Gruppe errät durch Körperbewegung, Mimik und Gesten.</p>
+    </div>
+  `;
+}
+
+function renderSoundGuess() {
+  const word = pickReusableGenericItem('sound-guess', SOUND_WORDS);
+  elements.gameContent.innerHTML = `
+    <div class="word-card">
+      <p class="game-label">Geräusch</p>
+      <div class="big-word">${word}</div>
+      <p class="note">Der Spieler ahmt nur das Geräusch nach – ohne das Wort auszusprechen.</p>
+    </div>
+  `;
+}
+
+function renderNumberGuess() {
+  if (!state.currentGeneric || !state.currentGeneric.prompt) {
+    const item = pickReusableGenericItem('number-guess', ESTIMATION_QUESTIONS);
+    state.currentGeneric = { ...item, revealed: false };
+  }
+
+  const item = state.currentGeneric;
+  const answerMarkup = item.revealed
+    ? `
+      <div class="result-card">
+        <p class="game-label">Antwort</p>
+        <div class="big-word">${item.answer}</div>
+        <p class="note">${item.explanation}</p>
+      </div>
+    `
+    : `
+      <div class="result-card">
+        <p class="game-label">Deine Schätzung</p>
+        <p class="note">Gib deine Vermutung mündlich oder auf Papier ab. Anschließend wird die Antwort gezeigt.</p>
+        <button type="button" class="reveal-btn" data-action="reveal-answer">Antwort zeigen</button>
+      </div>
+    `;
+
+  elements.gameContent.innerHTML = `
+    <div class="prompt-card">
+      <p class="prompt-label">Frage</p>
+      <h3>${item.prompt}</h3>
+      ${answerMarkup}
+    </div>
+  `;
+}
+
+function renderGenericMode() {
+  const modeMap = {
+    'would-you-rather': { title: 'Wer würde eher ...?', description: 'Lesen, diskutieren und sofort entscheiden.', render: renderWouldYouRather },
+    'either-or': { title: 'Entweder oder', description: 'Schnelle Auswahlfragen für die ganze Gruppe.', render: renderEitherOr },
+    pantomime: { title: 'Pantomime', description: 'Ein Begriff nur durch Bewegung und Mimik erklären.', render: renderPantomime },
+    'sound-guess': { title: 'Geräusche raten', description: 'Nur Klang, keine Worte.', render: renderSoundGuess },
+    'number-guess': { title: 'Zahlen-Schätzung', description: 'Schätze und vergleiche danach die echte Antwort.', render: renderNumberGuess }
+  };
+
+  const config = modeMap[state.currentMode] || modeMap['would-you-rather'];
+  elements.gameTitle.textContent = config.title;
+  elements.gameDescription.textContent = config.description;
+  config.render();
+}
+
+function startGame(modeId) {
+  if (modeId === 'challenge') {
+    generateChallengeTask();
     return;
   }
 
-  state.usedActivityIds.delete(deleted[0].id);
-  saveActivities();
-  renderActivities();
-  saveGameState();
-
-  if (state.activities.length === 0) {
-    setFeedback('Alle Aktivitäten wurden gelöscht. Die Liste ist jetzt leer.', 'warning');
-  } else {
-    setFeedback('Aktivität gelöscht.', 'success');
-  }
+  state.currentMode = modeId;
+  state.currentGeneric = null;
+  renderGenericMode();
+  showScreen('game-screen');
 }
 
-// Service Worker prüfen und für GitHub Pages plus Offline-Nutzung registrieren.
-function registerServiceWorker() {
-  if (!('serviceWorker' in navigator)) {
-    return;
-  }
+function bindEvents() {
+  elements.modeGrid.addEventListener('click', (event) => {
+    const button = event.target.closest('[data-mode]');
+    if (!button) {
+      return;
+    }
 
-  const appBaseUrl = new URL('.', window.location.href).toString();
-  const serviceWorkerUrl = new URL('./sw.js', appBaseUrl).toString();
-
-  navigator.serviceWorker.register(serviceWorkerUrl, { scope: appBaseUrl }).catch(() => {
-    setStatus('Der Service Worker konnte nicht registriert werden. Die App bleibt jedoch nutzbar.', 'warning');
+    startGame(button.dataset.mode);
   });
-}
 
-function handleActivityListClick(event) {
-  const deleteButton = event.target.closest('.delete-btn');
-
-  if (!deleteButton) {
-    return;
-  }
-
-  const index = Number(deleteButton.dataset.index);
-  deleteActivity(index);
-}
-
-function updateTeamMode() {
-  state.teamMode = !state.teamMode;
-  renderModeControls();
-  if (!saveGameState()) {
-    setStatus('Die Einstellung konnte nicht gespeichert werden.', 'warning');
-  } else {
-    setStatus('');
-  }
-}
-
-function updateRepeatMode() {
-  state.avoidRepeats = !state.avoidRepeats;
-  renderModeControls();
-  if (!saveGameState()) {
-    setStatus('Die Einstellung konnte nicht gespeichert werden.', 'warning');
-  } else {
-    setStatus('');
-  }
-}
-
-function initApp() {
-  loadActivities();
-  loadGameState();
-  renderActivities();
-  showScreen('start');
-  updateActivityCount();
-  setFeedback('');
-  setStatus('');
-
-  elements.newTaskButton.addEventListener('click', startNewTask);
-  elements.manageActivitiesButton.addEventListener('click', () => {
-    setFeedback('');
-    showScreen('manage');
+  elements.manageBtn.addEventListener('click', () => {
+    setTaskFeedback('');
+    showScreen('manage-screen');
   });
-  elements.backToStartButton.addEventListener('click', () => {
-    setStatus('');
-    showScreen('start');
+
+  elements.nextChallengeBtn.addEventListener('click', generateChallengeTask);
+  elements.challengeBackBtn.addEventListener('click', () => {
+    setGlobalStatus('');
+    showScreen('home-screen');
   });
-  elements.nextTaskButton.addEventListener('click', startNewTask);
-  elements.manageBackButton.addEventListener('click', () => {
-    setFeedback('');
-    showScreen('start');
+
+  elements.gameNextBtn.addEventListener('click', () => {
+    if (state.currentMode === 'number-guess') {
+      state.currentGeneric = null;
+    }
+    renderGenericMode();
   });
-  elements.activityForm.addEventListener('submit', addActivity);
-  elements.activityList.addEventListener('click', handleActivityListClick);
-  document.querySelectorAll('[data-team-mode]').forEach((button) => {
-    button.addEventListener('click', updateTeamMode);
+
+  elements.gameBackBtn.addEventListener('click', () => {
+    setGlobalStatus('');
+    showScreen('home-screen');
   });
-  document.querySelectorAll('[data-avoid-repeats]').forEach((button) => {
-    button.addEventListener('click', updateRepeatMode);
+
+  elements.taskForm.addEventListener('submit', addChallenge);
+  elements.taskList.addEventListener('click', (event) => {
+    const button = event.target.closest('.delete-btn');
+    if (!button) {
+      return;
+    }
+
+    deleteChallenge(button.dataset.taskId);
   });
-  document.querySelector('#rules-button').addEventListener('click', () => {
+
+  document.querySelectorAll('[data-setting]').forEach((button) => {
+    button.addEventListener('click', () => {
+      const setting = button.dataset.setting;
+      if (setting === 'team-mode') {
+        state.teamMode = !state.teamMode;
+      } else {
+        state.avoidRepeats = !state.avoidRepeats;
+      }
+
+      renderSettingsButtons();
+      saveSettings();
+    });
+  });
+
+  elements.manageBackBtn.addEventListener('click', () => {
+    setTaskFeedback('');
+    showScreen('home-screen');
+  });
+
+  elements.rulesButton.addEventListener('click', () => {
     elements.rulesDialog.showModal();
   });
-  elements.rulesDialog.querySelector('.rules-close').addEventListener('click', () => {
-    elements.rulesDialog.close();
+
+  elements.imprintButton.addEventListener('click', () => {
+    elements.imprintDialog.showModal();
   });
+
+  document.querySelectorAll('.dialog-close').forEach((button) => {
+    button.addEventListener('click', () => {
+      button.closest('dialog')?.close();
+    });
+  });
+
   elements.rulesDialog.addEventListener('click', (event) => {
     if (event.target === elements.rulesDialog) {
       elements.rulesDialog.close();
     }
   });
 
-  registerServiceWorker();
+  elements.imprintDialog.addEventListener('click', (event) => {
+    if (event.target === elements.imprintDialog) {
+      elements.imprintDialog.close();
+    }
+  });
+
+  elements.gameContent.addEventListener('click', (event) => {
+    const revealButton = event.target.closest('[data-action="reveal-answer"]');
+    if (!revealButton || !state.currentGeneric) {
+      return;
+    }
+
+    state.currentGeneric.revealed = true;
+    renderNumberGuess();
+  });
 }
 
-initApp();
+function registerServiceWorker() {
+  if (!('serviceWorker' in navigator)) {
+    return;
+  }
+
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js').catch(() => {
+      // Service worker registration is optional and fails on unsupported environments.
+    });
+  });
+}
+
+function init() {
+  loadChallengeTasks();
+  loadSettings();
+  renderModeGrid();
+  renderTaskList();
+  renderSettingsButtons();
+  bindEvents();
+  registerServiceWorker();
+  showScreen('home-screen');
+}
+
+init();

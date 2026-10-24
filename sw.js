@@ -1,4 +1,4 @@
-const CACHE_NAME = 'lucky-act-v3';
+const CACHE_NAME = 'party-mix-v1';
 const APP_SHELL = [
   './',
   './index.html',
@@ -16,8 +16,8 @@ self.addEventListener('install', (event) => {
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((cacheNames) => {
-      const oldCaches = cacheNames.filter((cacheName) => cacheName !== CACHE_NAME);
-      return Promise.all(oldCaches.map((cacheName) => caches.delete(cacheName)));
+      const stale = cacheNames.filter((name) => name !== CACHE_NAME);
+      return Promise.all(stale.map((name) => caches.delete(name)));
     }).then(() => self.clients.claim())
   );
 });
@@ -42,12 +42,12 @@ self.addEventListener('fetch', (event) => {
       }
 
       return fetch(event.request)
-        .then((networkResponse) => {
-          if (networkResponse && networkResponse.status === 200) {
-            const responseCopy = networkResponse.clone();
-            caches.open(CACHE_NAME).then((cache) => cache.put(event.request, responseCopy));
+        .then((response) => {
+          if (response && response.status === 200) {
+            const copy = response.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy));
           }
-          return networkResponse;
+          return response;
         })
         .catch(() => {
           if (event.request.mode === 'navigate') {
